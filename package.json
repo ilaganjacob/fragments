@@ -11,5 +11,8 @@
     "url": "git+https://github.com/ilaganjacob/fragments.git"
   },
   "author": "Jacob Ilagan",
-  "license": "UNLICENSED"
+  "license": "UNLICENSED",
+  "devDependencies": {
+    "prettier": "3.4.2"
+  }
 }
