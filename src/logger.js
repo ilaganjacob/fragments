@@ -12,6 +12,7 @@ if (options.level === 'debug') {
       colorize: true,
     },
   };
+  console.log(process.env);
 }
 
 // Create and export a Pino Logger instance:
