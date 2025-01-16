@@ -5,6 +5,11 @@ const cors = require('cors');
 const helmet = require('helmet');
 const compression = require('compression');
 
+// modifications to src/app.js
+const passport = require('passport');
+
+const authenticate = require('./auth');
+
 const logger = require('./logger');
 const pino = require('pino-http')({
   // Use our default logger instance, which is already configured
@@ -23,6 +28,9 @@ app.use(cors());
 
 // Use gzip/deflate compression middleware
 app.use(compression());
+
+passport.use(authenticate.strategy());
+app.use(passport.initialize());
 
 // Define our routes
 app.use('/', require('./routes'));
