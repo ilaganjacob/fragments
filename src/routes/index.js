@@ -34,6 +34,7 @@ router.get('/', (req, res) => {
       version,
     })
   );
+  // **** OLD CODE ****
   // res.status(200).json({
   //   status: 'ok',
   //   author,
