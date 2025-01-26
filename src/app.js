@@ -4,6 +4,7 @@ const express = require('express');
 const cors = require('cors');
 const helmet = require('helmet');
 const compression = require('compression');
+const { createErrorResponse } = require('./response');
 
 // modifications to src/app.js
 const passport = require('passport');
@@ -60,6 +61,9 @@ app.use((err, req, res, next) => {
   if (status > 499) {
     logger.error({ err }, `Error processing request`);
   }
+
+  // Refactor to use createErrorResponse, status: error is already sent
+  res.status(status).json(createErrorResponse({ error: { code: status, message: message } }));
 
   res.status(status).json({
     status: 'error',
