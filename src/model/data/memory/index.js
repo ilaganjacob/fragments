@@ -53,3 +53,10 @@ function deleteFragment(ownerId, id) {
     data.del(ownerId, id),
   ]);
 }
+
+module.exports.listFragments = listFragments;
+module.exports.writeFragment = writeFragment;
+module.exports.readFragment = readFragment;
+module.exports.writeFragmentData = writeFragmentData;
+module.exports.readFragmentData = readFragmentData;
+module.exports.deleteFragment = deleteFragment;
