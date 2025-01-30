@@ -62,4 +62,10 @@ describe('memory-db', () => {
   test('del() throws if primaryKey and secondaryKey are not in db', () => {
     expect(() => db.del('a', 'a')).rejects.toThrow();
   });
+
+  test('get() expects string keys', () => {
+    expect(async () => await db.get()).rejects.toThrow();
+    expect(async () => await db.get(1)).rejects.toThrow();
+    expect(async () => await db.get(1, 1)).rejects.toThrow();
+  });
 });
