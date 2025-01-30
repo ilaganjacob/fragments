@@ -36,5 +36,11 @@ class MemoryDB {
         `primaryKey and secondaryKey strings are required, got primaryKey=${primaryKey}, secondaryKey=${secondaryKey}`
       );
     }
+    const db = this.db;
+    // Make sure the 'primaryKey' exists, or create it
+    db[primaryKey] = db[primaryKey] || {};
+    // Add the 'value' to the 'secondaryKey'
+    db[primaryKey][secondaryKey] = value;
+    return Promise.resolve();
   }
 }
