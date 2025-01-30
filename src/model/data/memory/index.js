@@ -24,6 +24,17 @@ class MemoryDB {
   }
 
   /**
-   *  Puts a value into the given primaryKey and secondaryKey
+   * Puts a value into the given primaryKey and secondaryKey
+   * @param {string} primaryKey
+   * @param {string} secondaryKey
+   * @returns {Promise<void>}
    */
+
+  put(primaryKey, secondaryKey, value) {
+    if (!(validateKey(primaryKey) && validateKey(secondaryKey))) {
+      throw new Error(
+        `primaryKey and secondaryKey strings are required, got primaryKey=${primaryKey}, secondaryKey=${secondaryKey}`
+      );
+    }
+  }
 }
