@@ -18,4 +18,11 @@ describe('memory-db', () => {
     const result = await db.get('a', 'b');
     expect(result).toEqual(data);
   });
+
+  test('put() and get() work with Buffers', async () => {
+    const data = Buffer.from([1, 2, 3]);
+    await db.put('a', 'b', data);
+    const result = await db.get('a', 'b');
+    expect(result).toEqual(data);
+  });
 });
