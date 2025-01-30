@@ -43,3 +43,13 @@ async function listFragments(ownerId, expand = false) {
   // Otherwise, map to only send back the ids
   return parsedFragments.map((fragment) => fragment.id);
 }
+
+// Delete a fragment's metadata and data from memory db. Returns a Promise
+function deleteFragment(ownerId, id) {
+  return Promise.all([
+    // Delete metadata
+    metadata.del(ownerId, id),
+    // Delete the data
+    data.del(ownerId, id),
+  ]);
+}
