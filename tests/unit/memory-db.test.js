@@ -74,4 +74,8 @@ describe('memory-db', () => {
     expect(async () => await db.put(1)).rejects.toThrow();
     expect(async () => await db.put(1, 1)).rejects.toThrow();
   });
+  test('query() expects string key', () => {
+    expect(async () => await db.query()).rejects.toThrow();
+    expect(async () => await db.query(1)).rejects.toThrow();
+  });
 });
