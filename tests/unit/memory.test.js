@@ -1,9 +1,9 @@
 const MemoryDB = require('../../src/model/data/memory/index');
-import {
-  listFragments,
+const {
   writeFragment,
   readFragment,
   writeFragmentData,
   readFragmentData,
-  deleteFragment,
-} from '../../src/model/data/memory/index';
+} = require('../../src/model/data/memory/index');
+
+describe('readFragment ');
