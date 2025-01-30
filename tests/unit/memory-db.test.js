@@ -11,4 +11,11 @@ describe('memory-db', () => {
     const result = await db.put('a', 'b', {});
     expect(result).toBe(undefined);
   });
+
+  test('get() returns that we put() into the db', async () => {
+    const data = { value: 123 };
+    await db.put('a', 'b', data);
+    const result = await db.get('a', 'b');
+    expect(result).toEqual(data);
+  });
 });
