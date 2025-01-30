@@ -73,5 +73,8 @@ class MemoryDB {
         `primaryKey and secondaryKey strings are required, got primaryKey=${primaryKey}, secondaryKey=${secondaryKey}`
       );
     }
+    const db = this.db;
+    delete db[primaryKey][secondaryKey];
+    return Promise.resolve();
   }
 }
