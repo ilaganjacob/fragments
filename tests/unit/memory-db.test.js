@@ -68,4 +68,10 @@ describe('memory-db', () => {
     expect(async () => await db.get(1)).rejects.toThrow();
     expect(async () => await db.get(1, 1)).rejects.toThrow();
   });
+
+  test('put() expects string keys', () => {
+    expect(async () => await db.put()).rejects.toThrow();
+    expect(async () => await db.put(1)).rejects.toThrow();
+    expect(async () => await db.put(1, 1)).rejects.toThrow();
+  });
 });
