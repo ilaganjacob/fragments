@@ -19,3 +19,27 @@ async function readFragment(ownerId, id) {
   const serialized = await metadata.get(ownerId, id);
   return typeof serialized === 'string' ? JSON.parse(serialized) : serialized;
 }
+
+// Write a fragment's data buffer to memory db. Returns a Promise
+function writeFragmentData(ownerId, id, buffer) {
+  return data.put(ownerId, id, buffer);
+}
+
+// Read a fragment's data from memory db. Returns a Promise
+function readFragmentData(ownerId, id) {
+  return data.get(ownerId, id);
+}
+
+// Get a list of fragment ids/objects for the given user from memory db. Returns a Promise
+async function listFragments(ownerId, expand = false) {
+  const fragments = await metadata.query(ownerId);
+  const parsedFragments = fragments.map((fragment) => JSON.parse(fragment));
+
+  // If we don't get anything back, or are supposed to give expanded fragments, return
+  if (expand || !fragments) {
+    return parsedFragments;
+  }
+
+  // Otherwise, map to only send back the ids
+  return parsedFragments.map((fragment) => fragment.id);
+}
