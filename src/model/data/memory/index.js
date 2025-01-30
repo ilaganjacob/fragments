@@ -60,4 +60,18 @@ class MemoryDB {
     const values = db[primaryKey] ? Object.values(db[primaryKey]) : [];
     return Promise.resolve(values);
   }
+
+  /**
+   * Deletes the value with the given primaryKey and secondaryKey
+   * @param {string} primaryKey
+   * @param {string} secondaryKey
+   * @returns {Promise<void>}
+   */
+  async del(primaryKey, secondaryKey) {
+    if (!(validateKey(primaryKey) && validateKey(secondaryKey))) {
+      throw new Error(
+        `primaryKey and secondaryKey strings are required, got primaryKey=${primaryKey}, secondaryKey=${secondaryKey}`
+      );
+    }
+  }
 }
