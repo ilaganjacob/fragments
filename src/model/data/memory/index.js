@@ -78,3 +78,4 @@ class MemoryDB {
     return Promise.resolve();
   }
 }
+module.exports = MemoryDB;
