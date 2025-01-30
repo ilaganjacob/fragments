@@ -25,4 +25,20 @@ describe('memory-db', () => {
     const result = await db.get('a', 'b');
     expect(result).toEqual(data);
   });
+
+  test('get() with incorrect secondaryKey returns nothing', async () => {
+    await db.put('a', 'b', 123);
+    const result = db.get('a', 'c');
+    expect(result).toBe(undefined);
+  });
+
+  test('query() returns all secondaryKey values', async () => {
+    await db.put('a', 'a', { value: 1 });
+    await db.put('a', 'b', { value: 2 });
+    await db.put('a', 'c', { value: 3 });
+
+    const results = await db.query('a');
+    expect(Array.isArray(results)).toBe(true);
+    expect(results).toEqual([{ value: 1 }, { value: 2 }, { value: 3 }]);
+  });
 });
