@@ -31,3 +31,11 @@ curl -s localhost:port | jq
 # fetch headers only
 
 curl -i localhost:8080
+
+# testing
+
+to test, we do npm test to test all \*.test.js files
+
+to test specific files, we can do npm test {filename}
+
+if we git push origin main, the CI will give a green checkmark if all our tests pass
