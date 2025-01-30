@@ -1,7 +1,9 @@
+// Fix this path to point to your project's `memory-db.js` source file
 const MemoryDB = require('../../src/model/data/memory/memory-db');
 
 describe('memory-db', () => {
   let db;
+
   // Each test will get its own, empty database instance
   beforeEach(() => {
     db = new MemoryDB();
@@ -12,7 +14,7 @@ describe('memory-db', () => {
     expect(result).toBe(undefined);
   });
 
-  test('get() returns that we put() into the db', async () => {
+  test('get() returns what we put() into the db', async () => {
     const data = { value: 123 };
     await db.put('a', 'b', data);
     const result = await db.get('a', 'b');
@@ -28,7 +30,7 @@ describe('memory-db', () => {
 
   test('get() with incorrect secondaryKey returns nothing', async () => {
     await db.put('a', 'b', 123);
-    const result = db.get('a', 'c');
+    const result = await db.get('a', 'c');
     expect(result).toBe(undefined);
   });
 
@@ -42,7 +44,7 @@ describe('memory-db', () => {
     expect(results).toEqual([{ value: 1 }, { value: 2 }, { value: 3 }]);
   });
 
-  test('query() returns an empty array', async () => {
+  test('query() returns empty array', async () => {
     await db.put('b', 'a', { value: 1 });
     await db.put('b', 'b', { value: 2 });
     await db.put('b', 'c', { value: 3 });
@@ -59,7 +61,7 @@ describe('memory-db', () => {
     expect(await db.get('a', 'a')).toBe(undefined);
   });
 
-  test('del() throws if primaryKey and secondaryKey are not in db', () => {
+  test('del() throws if primaryKey and secondaryKey not in db', () => {
     expect(() => db.del('a', 'a')).rejects.toThrow();
   });
 
@@ -74,10 +76,12 @@ describe('memory-db', () => {
     expect(async () => await db.put(1)).rejects.toThrow();
     expect(async () => await db.put(1, 1)).rejects.toThrow();
   });
+
   test('query() expects string key', () => {
     expect(async () => await db.query()).rejects.toThrow();
     expect(async () => await db.query(1)).rejects.toThrow();
   });
+
   test('del() expects string keys', () => {
     expect(async () => await db.del()).rejects.toThrow();
     expect(async () => await db.del(1)).rejects.toThrow();
