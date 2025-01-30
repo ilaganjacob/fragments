@@ -51,4 +51,11 @@ describe('memory-db', () => {
     expect(Array.isArray(results)).toBe(true);
     expect(results).toEqual([]);
   });
+
+  test('del() removes value put() into db', async () => {
+    await db.put('a', 'a', { value: 1 });
+    expect(await db.get('a', 'a')).toEqual({ value: 1 });
+    await db.del('a', 'a');
+    expect(await db.get('a', 'a')).toBe(undefined);
+  });
 });
