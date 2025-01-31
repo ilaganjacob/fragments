@@ -7,12 +7,23 @@ const {
 
 // readFragment test
 describe('readFragment test ', () => {
+  const ownerId = '1234';
+  const fragmentId = 'abcd';
+  const testFragment = {
+    id: fragmentId,
+    ownerId,
+    type: 'text/plain',
+    size: 10,
+  };
+
   test('should return undefined for non-existent fragment', async () => {
     const result = await readFragment('abc', 'sss');
     expect(result).toBe(undefined);
   });
 
   test('should return the fragment after reading it', async () => {
-    const testFragment = {};
+    const testFragment = {
+      id: '123',
+    };
   });
 });
