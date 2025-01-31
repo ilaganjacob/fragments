@@ -19,12 +19,12 @@ describe('readFragment test ', () => {
     // await because it returns a promise
     await writeFragment(testFragment);
 
-    const result = await readFragment(testFragment);
+    const result = await readFragment(ownerId, fragmentId);
     expect(result).toEqual(testFragment);
   });
 
   test('should return undefined for non-existent fragment', async () => {
-    const result = await readFragment('abc', 'sss');
+    const result = await readFragment(ownerId, 'sss');
     expect(result).toBe(undefined);
   });
 
