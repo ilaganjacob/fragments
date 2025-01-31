@@ -6,7 +6,7 @@ const {
 } = require('../../src/model/data/memory/index');
 
 // readFragment test
-describe('readFragment test ', () => {
+describe('Fragment Metadata tests ', () => {
   const ownerId = '1234';
   const fragmentId = 'abcd';
   const testFragment = {
@@ -36,3 +36,5 @@ describe('readFragment test ', () => {
     await expect(writeFragment(invalidFragment)).rejects.toThrow();
   });
 });
+
+describe('Fragment data tests', () => {});
