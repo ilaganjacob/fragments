@@ -28,13 +28,37 @@ describe('Fragment Metadata tests ', () => {
     expect(result).toBe(undefined);
   });
 
-  test('writeFragment should throw for invalid keys', async () => {
+  test('writeFragment should throw for invalid fragment id', async () => {
+    expect.assertions(1); // Ensure the expect in the catch block is called since checking for error
+
     const invalidFragment = {
       ...testFragment,
       id: null,
     };
-    await expect(writeFragment(invalidFragment)).rejects.toThrow(
-      'primaryKey and secondaryKey strings are required, got primaryKey=1234, secondaryKey=null'
-    );
+
+    try {
+      await writeFragment(invalidFragment);
+    } catch (error) {
+      expect(error.message).toBe(
+        'primaryKey and secondaryKey strings are required, got primaryKey=1234, secondaryKey=null'
+      );
+    }
+  });
+
+  test('writeFragment should throw for invalid ownerId', async () => {
+    expect.assertions(1); // Ensure the expect in the catch block is called since checking for error
+
+    const invalidFragment = {
+      ...testFragment,
+      ownerId: null,
+    };
+
+    try {
+      await writeFragment(invalidFragment);
+    } catch (error) {
+      expect(error.message).toBe(
+        'primaryKey and secondaryKey strings are required, got primaryKey=null, secondaryKey=abcd'
+      );
+    }
   });
 });
