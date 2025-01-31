@@ -37,4 +37,8 @@ describe('Fragment Metadata tests ', () => {
   });
 });
 
-describe('Fragment data tests', () => {});
+// describe('Fragment data tests', () => {
+//   test('writeFragmentData should store buffer data', async () => {
+
+//   });
+// });
