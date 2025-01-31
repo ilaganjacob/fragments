@@ -33,12 +33,8 @@ describe('Fragment Metadata tests ', () => {
       ...testFragment,
       id: null,
     };
-    await expect(writeFragment(invalidFragment)).rejects.toThrow();
+    await expect(writeFragment(invalidFragment)).rejects.toThrow(
+      'primaryKey and secondaryKey strings are required, got primaryKey=1234, secondaryKey=null'
+    );
   });
 });
-
-// describe('Fragment data tests', () => {
-//   test('writeFragmentData should store buffer data', async () => {
-
-//   });
-// });
