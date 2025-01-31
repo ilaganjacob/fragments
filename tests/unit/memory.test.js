@@ -28,9 +28,11 @@ describe('readFragment test ', () => {
     expect(result).toBe(undefined);
   });
 
-  test('should return the fragment after reading it', async () => {
-    const testFragment = {
-      id: '123',
+  test('writeFragment should throw for invalid keys', async () => {
+    const invalidFragment = {
+      ...testFragment,
+      id: null,
     };
+    await expect(writeFragment(invalidFragment)).rejects.toThrow();
   });
 });
