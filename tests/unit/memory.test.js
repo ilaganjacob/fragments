@@ -15,6 +15,13 @@ describe('readFragment test ', () => {
     type: 'text/plain',
     size: 10,
   };
+  test('writeFragment should store fragment metadata', async () => {
+    // await because it returns a promise
+    await writeFragment(testFragment);
+
+    const result = await readFragment(testFragment);
+    expect(result).toEqual(testFragment);
+  });
 
   test('should return undefined for non-existent fragment', async () => {
     const result = await readFragment('abc', 'sss');
