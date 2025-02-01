@@ -72,5 +72,10 @@ describe('Fragment Memory Database tests', () => {
       const result = await readFragmentData(ownerId, fragmentId);
       expect(Buffer.compare(result, testData)).toBe(0);
     });
+
+    test('readFragmentData should return undefined for non-existent data', async () => {
+      const result = await readFragmentData(ownerId, 'doesnotexist');
+      expect(result).toBe(undefined);
+    });
   });
 });
