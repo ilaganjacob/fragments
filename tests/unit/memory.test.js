@@ -15,6 +15,9 @@ describe('Fragment Metadata tests ', () => {
     type: 'text/plain',
     size: 10,
   };
+
+  const testData = Buffer.from('Hello Test');
+
   test('writeFragment should store fragment metadata', async () => {
     // await because it returns a promise
     await writeFragment(testFragment);
@@ -63,4 +66,8 @@ describe('Fragment Metadata tests ', () => {
   });
 });
 
-describe('Fragment Data tests', () => {});
+describe('Fragment Data tests', () => {
+  test('writeFragmentData should store and read Buffer data', async () => {
+    await writeFragmentData(ownerId, id, testd);
+  });
+});
