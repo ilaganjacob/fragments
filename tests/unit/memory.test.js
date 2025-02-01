@@ -69,6 +69,8 @@ describe('Fragment Memory Database tests', () => {
   describe('Fragment Data tests', () => {
     test('writeFragmentData should store and read Buffer data', async () => {
       await writeFragmentData(ownerId, fragmentId, testData);
+      const result = await readFragmentData(ownerId, fragmentId);
+      expect(Buffer.compare(result, testData)).toBe(0);
     });
   });
 });
