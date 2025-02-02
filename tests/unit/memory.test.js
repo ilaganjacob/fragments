@@ -83,5 +83,12 @@ describe('Fragment Data tests', () => {
 
   test('writeFragmentData should allow overwriting existing data', async () => {
     // Write initial data
+    await writeFragment(ownerId, fragmentId, testData);
+
+    const newData = Buffer.from('New Data');
+    await writeFragmentData(ownerId, fragmentId, newData);
+
+    const result = readFragmentData(ownerId, fragmentId, newData);
+    expect(Buffer.compare(result, newData)).toBe(0);
   });
 });
