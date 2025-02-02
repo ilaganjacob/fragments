@@ -66,6 +66,10 @@ describe('Fragment Metadata tests ', () => {
 });
 
 describe('Fragment Data tests', () => {
+  const ownerId = '1234';
+  const fragmentId = 'abcd';
+  const testData = Buffer.from('Hello Test');
+
   test('writeFragmentData should store and read Buffer data', async () => {
     await writeFragmentData(ownerId, fragmentId, testData);
     const result = await readFragmentData(ownerId, fragmentId);
