@@ -85,9 +85,11 @@ describe('Fragment Data tests', () => {
     // Write initial data
     await writeFragmentData(ownerId, fragmentId, testData);
 
+    // Write new data
     const newData = Buffer.from('New Data');
     await writeFragmentData(ownerId, fragmentId, newData);
 
+    // Read and verify new data
     const result = await readFragmentData(ownerId, fragmentId);
     expect(Buffer.compare(result, newData)).toBe(0);
   });
