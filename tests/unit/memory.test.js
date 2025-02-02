@@ -80,4 +80,8 @@ describe('Fragment Data tests', () => {
     const result = await readFragmentData(ownerId, 'doesnotexist');
     expect(result).toBe(undefined);
   });
+
+  test('writeFragmentData should allow overwriting existing data', async () => {
+    // Write initial data
+  });
 });
