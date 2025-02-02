@@ -93,4 +93,10 @@ describe('Fragment Data tests', () => {
     const result = await readFragmentData(ownerId, fragmentId);
     expect(Buffer.compare(result, newData)).toBe(0);
   });
+
+  test('should not be able to read data for different owner', async () => {
+    await writeFragmentData(ownerId, fragmentId, testData);
+    const result = await readFragmentData('wrong-owner', fragmentId);
+    expect(result).toBe(undefined);
+  });
 });
