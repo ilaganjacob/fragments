@@ -7,7 +7,6 @@ const {
 
 // readFragment test
 
-const testData = Buffer.from('Hello Test');
 describe('Fragment Metadata tests ', () => {
   const ownerId = '1234';
   const fragmentId = 'abcd';
