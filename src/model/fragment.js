@@ -90,8 +90,8 @@ class Fragment {
    * Gets the fragment's data from the database
    * @returns Promise<Buffer>
    */
-  getData() {
-    // TODO
+  async getData() {
+    return await readFragmentData(this.ownerId, this.id);
   }
 
   /**
@@ -119,7 +119,7 @@ class Fragment {
    * @returns {boolean} true if fragment's type is text/*
    */
   get isText() {
-    // TODO
+    return this.mimeType().includes('text/');
   }
 
   /**
@@ -127,7 +127,8 @@ class Fragment {
    * @returns {Array<string>} list of supported mime types
    */
   get formats() {
-    // TODO
+    // Just return this for now since it's the only supported type
+    return ['text/plain'];
   }
 
   /**
