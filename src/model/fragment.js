@@ -36,12 +36,12 @@ class Fragment {
       throw new Error('size cannot be negative');
     }
 
-    this.id = id;
+    this.id = id || randomUUID();
     this.ownerId = ownerId;
-    this.type = obj.type || type;
+    this.created = created || new Date().toISOString();
+    this.updated = updated || new Date().toISOString();
+    this.type = type;
     this.size = size;
-    this.created = new Date().toDateString();
-    this.updated = new Date().toDateString();
   }
 
   /**
