@@ -16,16 +16,17 @@ const {
 
 class Fragment {
   constructor({ id, ownerId, created, updated, type, size = 0 }) {
+    // parse type to get object with type,
+    const obj = contentType.parse(type);
     // Throwing errors to ensure attributes are given
     if (!ownerId && !type) {
       throw new Error('Missing ownerId & type');
     }
-
     if (!type) {
       throw new Error('Missing type ');
     }
     // Use includes because type can have a charset
-    if (!type.includes('text/plain')) {
+    if (!type.includes('text/plain') || obj.type !== 'text/plain') {
       throw new Error('Type must include "text/plain"');
     }
     if (size.NaN()) {
@@ -34,11 +35,13 @@ class Fragment {
     if (size < 0) {
       throw new Error('size cannot be negative');
     }
+
     this.id = id;
     this.ownerId = ownerId;
-    this.type = type;
+    this.type = obj.type || type;
     this.size = size;
-    this.created = new Date();
+    this.created = new Date().toDateString();
+    this.updated = new Date().toDateString();
   }
 
   /**
