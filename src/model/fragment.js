@@ -82,8 +82,10 @@ class Fragment {
    * Saves the current fragment (metadata) to the database
    * @returns Promise<void>
    */
-  save() {
-    // TODO
+  async save() {
+    // Update the updated attribute
+    this.updated = new Date().toISOString();
+    await writeFragment(this);
   }
 
   /**
@@ -102,6 +104,8 @@ class Fragment {
   async setData(data) {
     // TODO
     // TIP: make sure you update the metadata whenever you change the data, so they match
+    await writeFragmentData(this.ownerId, this.id, data);
+    await this.save();
   }
 
   /**
