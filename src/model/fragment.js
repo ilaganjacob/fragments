@@ -54,7 +54,11 @@ class Fragment {
    * @returns Promise<Array<Fragment>>
    */
   static async byUser(ownerId, expand = false) {
-    // TODO
+    const fragments = await listFragments(ownerId, expand);
+    if (!expand) {
+      return fragments;
+    }
+    return fragments.map((fragment) => new Fragment(fragment));
   }
 
   /**
