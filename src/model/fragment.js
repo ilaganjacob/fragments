@@ -102,8 +102,10 @@ class Fragment {
    * @returns Promise<void>
    */
   async setData(data) {
-    // TODO
     // TIP: make sure you update the metadata whenever you change the data, so they match
+    // Update relevant fields
+    this.size = data.length;
+    this.updated = new Date().toISOString();
     await writeFragmentData(this.ownerId, this.id, data);
     await this.save();
   }
