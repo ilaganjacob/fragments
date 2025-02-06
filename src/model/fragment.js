@@ -16,7 +16,29 @@ const {
 
 class Fragment {
   constructor({ id, ownerId, created, updated, type, size = 0 }) {
-    // TODO
+    // Throwing errors to ensure attributes are given
+    if (!ownerId && !type) {
+      throw new Error('Missing ownerId & type');
+    }
+
+    if (!type) {
+      throw new Error('Missing type ');
+    }
+    // Use includes because type can have a charset
+    if (!type.includes('text/plain')) {
+      throw new Error('Type must include "text/plain"');
+    }
+    if (size.NaN()) {
+      throw new Error('size must be a number');
+    }
+    if (size < 0) {
+      throw new Error('size cannot be negative');
+    }
+    this.id = id;
+    this.ownerId = ownerId;
+    this.type = type;
+    this.size = size;
+    this.created = new Date();
   }
 
   /**
