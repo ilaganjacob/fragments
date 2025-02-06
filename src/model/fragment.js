@@ -66,6 +66,13 @@ class Fragment {
   static async byId(ownerId, id) {
     // TODO
     // TIP: make sure you properly re-create a full Fragment instance after getting from db.
+    const fragment = await readFragment(ownerId, id);
+    // Check if it exists, helpful error message
+    if (!fragment) {
+      throw new Error(`Fragment ${id} does not exist`);
+    }
+    // Create fragment from readFragment's result
+    return new Fragment(fragment);
   }
 
   /**
@@ -75,7 +82,8 @@ class Fragment {
    * @returns Promise<void>
    */
   static delete(ownerId, id) {
-    // TODO
+    const deletedData = readFragmentData(ownerId, id);
+    const deletedFragment = readFragment(ownerId, id);
   }
 
   /**
