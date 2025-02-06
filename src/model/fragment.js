@@ -82,8 +82,7 @@ class Fragment {
    * @returns Promise<void>
    */
   static delete(ownerId, id) {
-    const deletedData = readFragmentData(ownerId, id);
-    const deletedFragment = readFragment(ownerId, id);
+    return deleteFragment(ownerId, id);
   }
 
   /**
