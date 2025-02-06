@@ -16,24 +16,27 @@ const {
 
 class Fragment {
   constructor({ id, ownerId, created, updated, type, size = 0 }) {
+    // Throwing errors to ensure attributes are given
+    if (!ownerId || !type) {
+      throw new Error('Missing ownerId & type');
+    }
+
     // parse type to get object with type,
     const obj = contentType.parse(type);
-    // Throwing errors to ensure attributes are given
-    if (!ownerId && !type) {
-      throw new Error('Missing ownerId & type');
+    if (!Fragment.isSupportedType(obj.type)) {
+      throw new Error(`type ${obj.type} is not supported`);
     }
     if (!type) {
       throw new Error('Missing type ');
     }
+
     // Use includes because type can have a charset
     if (!type.includes('text/plain') || obj.type !== 'text/plain') {
       throw new Error('Type must include "text/plain"');
     }
-    if (size.NaN()) {
-      throw new Error('size must be a number');
-    }
-    if (size < 0) {
-      throw new Error('size cannot be negative');
+
+    if (typeof size !== 'number' || size < 0) {
+      throw new Error('size must be a non-negative number');
     }
 
     this.id = id || randomUUID();
@@ -133,7 +136,8 @@ class Fragment {
    * @returns {boolean} true if we support this Content-Type (i.e., type/subtype)
    */
   static isSupportedType(value) {
-    // TODO
+    const { type } = contentType.parse(value);
+    return type === 'text/plain';
   }
 }
 
