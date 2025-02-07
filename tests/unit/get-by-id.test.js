@@ -48,4 +48,23 @@ describe('GET /v1/fragments/:id tests', () => {
     expect(res.body.fragment.type).toBe('text/plain');
     expect(res.body.fragment.size).toBe(11);
   });
+
+  test("cannot retrieve another user's fragment", async () => {
+    const user1Id = 'user1@email.com';
+
+    const fragment = new Fragment({
+      ownerId: user1Id,
+      type: 'text/plain',
+      size: 11,
+    });
+
+    await fragment.save();
+    await fragment.setData(Buffer.from('Hello World'));
+
+    // Try to retrieve as user2 (not allowed)
+    await request(app)
+      .get(`/v1/fragments/${fragment.id}`)
+      .auth('user2@email.com', 'password2')
+      .expect(404);
+  });
 });
