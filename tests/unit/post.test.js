@@ -34,4 +34,12 @@ describe('POST /v1/fragments', () => {
   });
 
   // Valid tests
+  test('create valid fragment with empty content', async () => {
+    await request(app)
+      .post('/v1/fragments')
+      .auth('user1@email.com', 'password1')
+      .set('content-type', 'text/plain')
+      .send('')
+      .expect(201);
+  });
 });
