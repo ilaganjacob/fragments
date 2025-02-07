@@ -29,23 +29,32 @@ module.exports = async (req, res) => {
     // Save the actual content
     await fragment.setData(req.body);
 
+    // Use API_URL from environment if defined, otherwise fallback to localhost
+    const host = process.env.API_URL ? new URL(process.env.API_URL).host : 'localhost:8080';
+
+    const protocol = process.env.API_URL
+      ? new URL(process.env.API_URL).protocol.replace(':', '')
+      : req.protocol;
+
+    const locationUrl = `${protocol}://${host}/v1/fragments/${fragment.id}`;
+
     // Create Location header URL using the new fragment's id
     // If API_URL is in .env, use that or else create from req
 
-    let fragmentsUrl;
-    if (process.env.API_URL) {
-      fragmentsUrl = new URL('/v1/fragments/', process.env.API_URL);
-    } else {
-      fragmentsUrl = new URL(`/v1/fragments/`, `${req.protocol}://{req.headers.host}`);
-    }
+    // let fragmentsUrl;
+    // if (process.env.API_URL) {
+    //   fragmentsUrl = new URL('/v1/fragments/', process.env.API_URL);
+    // } else {
+    //   fragmentsUrl = new URL(`/v1/fragments/`, `${req.protocol}://{req.headers.host}`);
+    // }
 
     // This is the URL where we can GET this fragment
-    const location = new URL(fragment.id, fragmentsUrl).href;
+    // const location = new URL(fragment.id, fragmentsUrl).href;
 
     // Send success response!
 
     res
-      .location(location) // Set Location header with URL
+      .location(locationUrl) // Set Location header with URL
       .status(201) // 201 Created
       .json(
         createSuccessResponse({
