@@ -3,6 +3,8 @@
 const request = require('supertest');
 
 const app = require('../../src/app');
+const { Fragment } = require('../../src/model/fragment');
+const { listFragments } = require('../../src/model/data');
 
 describe('GET /v1/fragments', () => {
   // If the request is missing the Authorization header, it should be forbidden
@@ -24,5 +26,28 @@ describe('GET /v1/fragments', () => {
     expect(res.body.fragments.length).toBe(0);
   });
 
-  // TODO: we'll need to add tests to check the contents of the fragments array later
+  test('authenticated user can retrieve their fragments', async () => {
+    const ownerId = 'user1@email.com';
+
+    const fragment1 = new Fragment({
+      ownerId,
+      type: 'text/plain',
+      size: 11,
+    });
+
+    await fragment1.save();
+    await fragment1.setData(Buffer.from('Hello World'));
+
+    const fragment2 = new Fragment({
+      ownerId,
+      type: 'text/plain',
+      size: 5,
+    });
+
+    await fragment2.save();
+    await fragment2.setData(Buffer.from('Test'));
+
+    // Retrieve fragments
+    const res = request(app).get('/v1/fragments').auth('user1@email.com', 'password1').expect(201);
+  });
 });
