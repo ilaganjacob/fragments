@@ -7,7 +7,7 @@ const auth = require('http-auth');
 const passport = require('passport');
 const authPassport = require('http-auth-passport');
 
-// missing this in the given code.
+const authorize = require('./auth-middleware');
 const logger = require('../logger');
 
 // We expect HTPASSWD_FILE to be defined.
@@ -27,4 +27,8 @@ module.exports.strategy = () =>
     })
   );
 
-module.exports.authenticate = () => passport.authenticate('http', { session: false });
+// Previously we defined `authenticate()` like this:
+// module.exports.authenticate = () => passport.authenticate('http', { session: false });
+//
+// Now we'll delegate the authorization to our authorize middleware
+module.exports.authenticate = () => authorize('http');
