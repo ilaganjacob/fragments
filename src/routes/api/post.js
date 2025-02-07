@@ -42,10 +42,11 @@ module.exports = async (req, res) => {
     // This is the URL where we can GET this fragment
     const location = new URL(fragment.id, fragmentsUrl).href;
 
-    // Return the fragment's metadata and location
+    // Send success response!
+
     res
-      .location(location)
-      .status(201)
+      .location(location) // Set Location header with URL
+      .status(201) // 201 Created
       .json(
         createSuccessResponse({
           fragment: {
@@ -63,3 +64,19 @@ module.exports = async (req, res) => {
     res.status(415).json(createErrorResponse(415, 'Unsupported Media Type'));
   }
 };
+
+/**
+ * // 5. SUCCESSFUL RESPONSE LOOKS LIKE:
+201 Created
+Location: http://localhost:8080/v1/fragments/123abc
+{
+  "status": "ok",
+  "fragment": {
+    "id": "123abc",
+    "ownerId": "user123",
+    "created": "2023-01-01T12:00:00Z",
+    "updated": "2023-01-01T12:00:00Z", 
+    "type": "text/plain",
+    "size": 11
+  }
+ */
