@@ -48,6 +48,17 @@ describe('GET /v1/fragments', () => {
     await fragment2.setData(Buffer.from('Test'));
 
     // Retrieve fragments
-    const res = request(app).get('/v1/fragments').auth('user1@email.com', 'password1').expect(201);
+    const res = await request(app)
+      .get('/v1/fragments')
+      .auth('user1@email.com', 'password1')
+      .expect(200);
+
+    expect(res.body.status).toBe('ok');
+    expect(Array.isArray(res.body.fragments)).toBe(true);
+    expect(res.body.fragments.length).toBe(2);
+
+    // Verify the fragment IDs for both fragments is the same
+    expect(res.body.fragments).toContain(fragment1.id);
+    expect(res.body.fragments).toContain(fragment2.id);
   });
 });
