@@ -12,4 +12,17 @@ describe('POST /v1/fragments', () => {
   test('nonexistent username and password combination', () => {
     return request(app).post('/v1/fragments').auth('invalid@email.com', 'invalidPass').expect(401);
   });
+
+  // If the content type is unsupported, reject it
+  // Using .htpasswd emails and passwords that are authenticated (system knows who they are) & authorized (system allows them to use this route)
+  test('unsupported content type', async () => {
+    await request(app)
+      .post('/v1/fragments')
+      .auth('user1@email.com', 'password1')
+      .set('Content-Type', 'application/json')
+      .send({ message: 'Not Supported..' })
+      .expect(415);
+  });
+
+  // If the request has no content-type, reject it
 });
