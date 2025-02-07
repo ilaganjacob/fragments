@@ -29,7 +29,25 @@ module.exports = async (req, res) => {
       },
       'Fragments received for user'
     );
+
+    // Info log: Successful fragment retrieval
+    logger.info(
+      {
+        ownerId: req.user,
+        fragmentCount: fragments.length,
+      },
+      'Successfully returned user fragment IDs'
+    );
+    // Return the list of fragment IDs
+    res.status(200).json(createSuccessResponse({ fragments }));
   } catch (err) {
+    // Error log: Unexpected error during fragment retrieval
     logger.error({ err }, 'Unexpected error receiving fragments');
+
+    // Warn log: Specific error details
+    logger.warn(`Fragment retrieval failed: ${err.message}`);
+
+    // Send an error response
+    res.status(500).json(createErrorResponse(500, 'Internal Server Error'));
   }
 };
