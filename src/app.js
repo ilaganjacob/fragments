@@ -64,14 +64,5 @@ app.use((err, req, res, next) => {
 
   // Refactor to use createErrorResponse, status: error is already sent
   res.status(status).json(createErrorResponse({ error: { code: status, message: message } }));
-
-  // **** OLD CODE ****
-  // res.status(status).json({
-  //   status: 'error',
-  //   error: {
-  //     message,
-  //     code: status,
-  //   },
-  // });
 });
 module.exports = app;
