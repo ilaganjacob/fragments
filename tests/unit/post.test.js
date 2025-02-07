@@ -35,19 +35,29 @@ describe('POST /v1/fragments', () => {
 
   // meta test
   test('create a text/plain fragment successfully', async () => {
+    const data = 'Hello World';
     const res = await request(app)
       .post('/v1/fragments')
       .auth('user1@email.com', 'password1')
       .set('content-type', 'text/plain')
-      .send('Hello World')
-      .expect(201);
+      .send(data);
 
-    // verify response structure
+    expect(res.statusCode).toBe(201);
     expect(res.body.status).toBe('ok');
-    expect(res.body.fragment).toHaveProperty('id');
-    expect(res.body.fragment).toHaveProperty('created');
-    expect(res.body.fragment.type).toBe('text/plain');
-    expect(res.body.fragment.size).toBe(11);
+
+    // Check the fragment metadata
+    const { fragment } = res.body;
+    expect(fragment).toHaveProperty('id');
+    expect(fragment).toHaveProperty('ownerId');
+    expect(fragment).toHaveProperty('created');
+    expect(fragment).toHaveProperty('updated');
+    expect(fragment).toHaveProperty('type', 'text/plain');
+    expect(fragment.size).toBe(data.length);
+
+    // Check the Location header
+    const location = res.headers.location;
+    expect(location).toBeDefined();
+    expect(location).toMatch(/^http:\/\/localhost:[\d]+\/v1\/fragments\/[-\w]+$/);
   });
 
   test('create valid fragment with empty content', async () => {
