@@ -25,4 +25,13 @@ describe('POST /v1/fragments', () => {
   });
 
   // If the request has no content-type, reject it
+  test('missing content-type', async () => {
+    await request(app)
+      .post('/v1/fragments')
+      .auth('user1@email.com', 'password1')
+      .send('Did not specify the content-type')
+      .expect(415);
+  });
+
+  // Valid tests
 });
