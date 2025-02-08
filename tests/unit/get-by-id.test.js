@@ -1,6 +1,7 @@
 const request = require('supertest');
 const app = require('../../src/app');
 const { Fragment } = require('../../src/model/fragment');
+const hash = require('../../src/hash');
 
 describe('GET /v1/fragments/:id tests', () => {
   // Authentication tests
@@ -25,10 +26,11 @@ describe('GET /v1/fragments/:id tests', () => {
 
   // Retrieve an existing fragment
   test('retrieve an existing fragment', async () => {
-    const ownerId = 'user1@email.com';
+    const email = 'user1@email.com';
+    const hashedEmail = hash(email);
 
     const fragment = new Fragment({
-      ownerId,
+      ownerId: hashedEmail,
       type: 'text/plain',
       size: 11,
     });
@@ -38,7 +40,7 @@ describe('GET /v1/fragments/:id tests', () => {
 
     const res = await request(app)
       .get(`/v1/fragments/${fragment.id}`)
-      .auth('user1@email.com', 'password1')
+      .auth(email, 'password1')
       .expect(200);
 
     // Verify the response
