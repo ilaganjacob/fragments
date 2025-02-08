@@ -4,6 +4,7 @@ const request = require('supertest');
 
 const app = require('../../src/app');
 const { Fragment } = require('../../src/model/fragment');
+const hash = require('../../src/hash');
 
 describe('GET /v1/fragments', () => {
   // If the request is missing the Authorization header, it should be forbidden
@@ -26,10 +27,11 @@ describe('GET /v1/fragments', () => {
   });
 
   test('authenticated user can retrieve their fragments', async () => {
-    const ownerId = 'user1@email.com';
+    const email = 'user1@email.com';
+    const hashedEmail = hash(email); // Hash the email
 
     const fragment1 = new Fragment({
-      ownerId,
+      ownerId: hashedEmail,
       type: 'text/plain',
       size: 11,
     });
@@ -38,7 +40,7 @@ describe('GET /v1/fragments', () => {
     await fragment1.setData(Buffer.from('Hello World'));
 
     const fragment2 = new Fragment({
-      ownerId,
+      ownerId: hashedEmail,
       type: 'text/plain',
       size: 5,
     });
@@ -47,10 +49,7 @@ describe('GET /v1/fragments', () => {
     await fragment2.setData(Buffer.from('Test'));
 
     // Retrieve fragments
-    const res = await request(app)
-      .get('/v1/fragments')
-      .auth('user1@email.com', 'password1')
-      .expect(200);
+    const res = await request(app).get('/v1/fragments').auth(email, 'password1').expect(200);
 
     expect(res.body.status).toBe('ok');
     expect(Array.isArray(res.body.fragments)).toBe(true);
