@@ -114,19 +114,3 @@ module.exports = async (req, res) => {
     res.status(500).json(createErrorResponse(500, 'Internal Server Error'));
   }
 };
-
-/**
- * // 5. SUCCESSFUL RESPONSE LOOKS LIKE:
-201 Created
-Location: http://localhost:8080/v1/fragments/123abc
-{
-  "status": "ok",
-  "fragment": {
-    "id": "123abc",
-    "ownerId": "user123",
-    "created": "2023-01-01T12:00:00Z",
-    "updated": "2023-01-01T12:00:00Z", 
-    "type": "text/plain",
-    "size": 11
-  }
- */
