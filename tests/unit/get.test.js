@@ -1,6 +1,7 @@
 // tests/unit/get.test.js
 
 const request = require('supertest');
+const logger = require('../../src/logger');
 
 const app = require('../../src/app');
 const { Fragment } = require('../../src/model/fragment');
@@ -58,5 +59,95 @@ describe('GET /v1/fragments', () => {
     // Verify the fragment IDs for both fragments is the same
     expect(res.body.fragments).toContain(fragment1.id);
     expect(res.body.fragments).toContain(fragment2.id);
+  });
+});
+
+describe('GET /v1/fragments Edge Cases', () => {
+  const email = 'user1@email.com';
+  const hashedEmail = hash(email);
+
+  beforeEach(async () => {
+    // Ensure a clean slate for each test
+    const existingFragments = await Fragment.byUser(hashedEmail);
+    for (const fragmentId of existingFragments) {
+      await Fragment.delete(hashedEmail, fragmentId);
+    }
+  });
+
+  test('returns empty array when no fragments exist', async () => {
+    const res = await request(app).get('/v1/fragments').auth(email, 'password1').expect(200);
+
+    expect(res.body.status).toBe('ok');
+    expect(res.body.fragments).toEqual([]);
+  });
+
+  test('handles multiple fragments', async () => {
+    // Create multiple fragments
+    const fragmentPromises = Array(5)
+      .fill()
+      .map((_, index) => {
+        const fragment = new Fragment({
+          ownerId: hashedEmail,
+          type: 'text/plain',
+          size: index + 1,
+        });
+        return fragment.save().then(() => fragment.setData(Buffer.from(`Fragment ${index + 1}`)));
+      });
+
+    await Promise.all(fragmentPromises);
+
+    const res = await request(app).get('/v1/fragments').auth(email, 'password1').expect(200);
+
+    expect(res.body.status).toBe('ok');
+    expect(res.body.fragments.length).toBe(5);
+  });
+});
+describe('GET /v1/fragments Coverage Tests', () => {
+  // Mock logger to test error logging paths
+  const mockErrorLog = jest.spyOn(logger, 'error').mockImplementation();
+  const mockWarnLog = jest.spyOn(logger, 'warn').mockImplementation();
+
+  afterEach(() => {
+    jest.clearAllMocks();
+  });
+
+  test('handles internal server error during fragment retrieval', async () => {
+    // Temporarily mock Fragment.byUser to throw an error
+    const originalByUser = Fragment.byUser;
+    Fragment.byUser = jest.fn().mockRejectedValue(new Error('Database connection failed'));
+
+    try {
+      const email = 'user1@email.com';
+      const res = await request(app).get('/v1/fragments').auth(email, 'password1').expect(500);
+
+      expect(res.body.status).toBe('error');
+      expect(res.body.error.code).toBe(500);
+      expect(res.body.error.message).toBe('Internal Server Error');
+
+      // Verify error was logged
+      expect(mockErrorLog).toHaveBeenCalled();
+      expect(mockWarnLog).toHaveBeenCalled();
+    } finally {
+      // Restore the original method
+      Fragment.byUser = originalByUser;
+    }
+  });
+
+  test('logs warning when fragment retrieval fails', async () => {
+    // Temporarily mock Fragment.byUser to throw an error
+    const originalByUser = Fragment.byUser;
+    Fragment.byUser = jest.fn().mockRejectedValue(new Error('Unexpected error'));
+
+    try {
+      const email = 'user1@email.com';
+      await request(app).get('/v1/fragments').auth(email, 'password1').expect(500);
+
+      // Verify error logging
+      expect(mockErrorLog).toHaveBeenCalled();
+      expect(mockWarnLog).toHaveBeenCalled();
+    } finally {
+      // Restore the original method
+      Fragment.byUser = originalByUser;
+    }
   });
 });
