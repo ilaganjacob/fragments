@@ -52,10 +52,11 @@ describe('GET /v1/fragments/:id tests', () => {
   });
 
   test("cannot retrieve another user's fragment", async () => {
-    const user1Id = 'user1@email.com';
+    const user1Email = 'user1@email.com';
+    const hashedUser1Email = hash(user1Email);
 
     const fragment = new Fragment({
-      ownerId: user1Id,
+      ownerId: hashedUser1Email,
       type: 'text/plain',
       size: 11,
     });
