@@ -180,7 +180,7 @@ cd package
 
 ```bash
 docker build -t fragments:latest .
-docker run --rm --name fragments --env-file env.jest -p 8080:8080 -d fragments:latest
+docker run --rm --name fragments --env-file env.jest -e LOG_LEVEL=debug -p 8080:8080 -d fragments:latest
 ```
 
 ## GitHub Actions CI
