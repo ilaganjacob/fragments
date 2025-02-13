@@ -8,7 +8,7 @@ Cloud Computing Microservice Project
 - Docker Desktop
 - AWS Account (AWS Academy)
 - git
-- curl (use curl.exe in PowerShell)
+- curl
 - jq (for JSON formatting)
 - VSCode with extensions:
   - ESLint
@@ -195,7 +195,6 @@ Check the Actions tab in GitHub to see CI status.
 
 ## Common Issues & Troubleshooting
 
-- If `curl` doesn't work in PowerShell, use `curl.exe`
 - Docker container name conflict: Stop existing container before creating new one
 - EC2 connection issues: Check security group allows port 8080
 - Missing environment variables: Ensure proper .env file is being used
