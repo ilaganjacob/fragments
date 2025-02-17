@@ -68,14 +68,6 @@ scp -i ~/.ssh/ccp555-key-pair.pem fragments-0.0.1.tgz ec2-user@ec2-3-16-456-301.
 ssh -i ~/.ssh/ccp555-key-pair.pem ec2-user@ec2-3-16-456-301.compute-1.amazonaws.com
 ```
 
-### Windows with PuTTY:
-
-1. Open PuTTY
-2. Enter Host Name: ec2-user@[your-instance-dns]
-3. Configure SSH > Auth > Credentials:
-   - Select your .ppk key file
-4. Click "Open"
-
 ## Basic Setup After Connecting
 
 ```bash
