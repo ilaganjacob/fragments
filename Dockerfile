@@ -7,6 +7,10 @@ FROM node:20.18.0-alpine AS builder
 LABEL maintainer="Jacob Ilagan <jilagan5@myseneca.ca>"
 LABEL description="Fragments node.js microservice"
 
+# Create non-root user for building. Security best practice
+RUN addgroup -S fragments && \
+    adduser -S fragments -G fragments
+
 # We default to use port 8080 in our service
 ENV PORT=8080
 
