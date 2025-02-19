@@ -22,9 +22,6 @@ ENV NPM_CONFIG_COLOR=false
 WORKDIR /app
 
 # Copy package.json and package-lock.json to /app
-# Option 1: explicit path - Copy the package.json and package-lock.json
-# files into /app. NOTE: the trailing `/` on `/app/`, which tells Docker
-# that `app` is a directory and not a file.
 COPY package*.json /app/
 
 # Install node dependencies defined in package-lock.json
