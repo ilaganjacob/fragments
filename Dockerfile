@@ -18,6 +18,14 @@ RUN chown -R fragments:fragments /app
 # Switch to non-root user
 USER fragments
 
+# Copy package files with explicit ownership
+COPY --chown=fragments:fragments package*.json ./
+
+
+
+
+
+
 # We default to use port 8080 in our service
 ENV PORT=8080
 
