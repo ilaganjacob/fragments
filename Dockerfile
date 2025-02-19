@@ -21,40 +21,19 @@ USER fragments
 # Copy package files with explicit ownership
 COPY --chown=fragments:fragments package*.json ./
 
+# Install dependencies for production only
+RUN npm ci --only=production
 
 
+# Copy source code with explicit ownership
+COPY --chown=fragments:fragments ./src ./src
+COPY --chown=fragments:fragments ./tests/.htppaswd ./tests/.htpasswd
 
+# Stage 2: Runtime stage
+FROM node:20.18.0-alpine AS runtime
 
+# Create runtime user
+RUN addgroup -S fragments && \
+    adduser -S fragments -G fragments
 
-# We default to use port 8080 in our service
-ENV PORT=8080
-
-# Reduce npm spam when installing within Docker
-# https://docs.npmjs.com/cli/v8/using-npm/config#loglevel
-ENV NPM_CONFIG_LOGLEVEL=warn
-
-# Disable colour when run inside Docker
-# https://docs.npmjs.com/cli/v8/using-npm/config#color
-ENV NPM_CONFIG_COLOR=false
-
-
-# Use /app as our workdir
-WORKDIR /app
-
-# Copy package.json and package-lock.json to /app
-COPY package*.json /app/
-
-# Install node dependencies defined in package-lock.json
-RUN npm install
-
-# Copy src to /app/src/
-COPY ./src ./src
-
-# Copy our HTPASSWD file
-COPY ./tests/.htpasswd ./tests/.htpasswd
-
-# Start the container by running our server
-CMD npm start
-
-# We run our service on port 8080
-EXPOSE 8080
+    
