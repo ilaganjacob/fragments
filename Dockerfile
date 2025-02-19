@@ -36,4 +36,8 @@ FROM node:20.18.0-alpine AS runtime
 RUN addgroup -S fragments && \
     adduser -S fragments -G fragments
 
-    
+# Set environment variables
+ENV PORT=8080 \
+    NODE_ENV=production \
+    NPM_CONFIG_LOGLEVEL=warn \
+    NPM_CONFIG_COLOR=false    
