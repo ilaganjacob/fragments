@@ -1,7 +1,8 @@
 # This file defines all of Docker's instructions for Docker engine to build an image.
 
-# use node 20.18.0 as base image
-FROM node:20.18.0
+# Multi-stage build for fragments microservice
+# Build stage
+FROM node:20.18.0-alpine AS builder
 
 LABEL maintainer="Jacob Ilagan <jilagan5@myseneca.ca>"
 LABEL description="Fragments node.js microservice"
