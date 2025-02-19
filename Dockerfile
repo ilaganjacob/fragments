@@ -15,6 +15,8 @@ RUN addgroup -S fragments && \
 WORKDIR /app
 RUN chown -R fragments:fragments /app
 
+# Switch to non-root user
+USER fragments
 
 # We default to use port 8080 in our service
 ENV PORT=8080
