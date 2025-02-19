@@ -27,7 +27,7 @@ RUN npm ci --only=production
 
 # Copy source code with explicit ownership
 COPY --chown=fragments:fragments ./src ./src
-COPY --chown=fragments:fragments ./tests/.htppaswd ./tests/.htpasswd
+COPY --chown=fragments:fragments ./tests/.htpasswd ./tests/.htpasswd
 
 # Stage 2: Runtime stage
 FROM node:20.18.0-alpine AS runtime
@@ -41,3 +41,21 @@ ENV PORT=8080 \
     NODE_ENV=production \
     NPM_CONFIG_LOGLEVEL=warn \
     NPM_CONFIG_COLOR=false    
+
+# Set working directory
+WORKDIR /app
+
+# Copy built artifacts from builder stage
+COPY --from=builder --chown=fragments:fragments /app .
+
+# Switch to non-root user for runtime
+USER fragments
+
+# Expose port
+EXPOSE 8080
+
+# Healthcheck
+HEALTHCHECK --interval=30s --timeout=10s --start-period=5s --retries=3 CMD wget --no-verbose --tries=1 --spider http://localhost:8080/ || exit 1
+
+# Start the application
+CMD ["npm", "start"]
