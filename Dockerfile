@@ -11,6 +11,11 @@ LABEL description="Fragments node.js microservice"
 RUN addgroup -S fragments && \
     adduser -S fragments -G fragments
 
+# Set working directory and ownership
+WORKDIR /app
+RUN chown -R fragments:fragments /app
+
+
 # We default to use port 8080 in our service
 ENV PORT=8080
 
