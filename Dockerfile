@@ -2,7 +2,7 @@
 
 # Multi-stage build for fragments microservice
 # Build stage
-FROM node:20.18.0-alpine AS builder
+FROM node:20.18.0-alpine@sha256:b1e0880c3af955867bc2f1944b49d20187beb7afa3f30173e15a97149ab7f5f1 AS builder
 
 LABEL maintainer="Jacob Ilagan <jilagan5@myseneca.ca>"
 LABEL description="Fragments node.js microservice"
