@@ -17,14 +17,21 @@ module.exports = async (req, res) => {
     // Retrieve the specific fragment
     const fragment = await Fragment.byId(req.user, req.params.id);
 
+    // Get the raw fragment data
+    const data = await fragment.getData();
+
+    // Set the Content-Type header to match the fragment's type
+    res.setHeader('Content-Type', fragment.type);
+
     // Debug log: Fragment retrieval details
     logger.debug(
       {
         fragmentId: fragment.id,
         type: fragment.type,
         size: fragment.size,
+        dataSize: data.length, // Add actual data size
       },
-      'The fragment info that was retrieved'
+      'Retrieved fragment data and metadata'
     );
 
     // Info log: Successful fragment retrieval
@@ -36,7 +43,8 @@ module.exports = async (req, res) => {
       'Successfully returned specific fragment'
     );
 
-    res.status(200).json(createSuccessResponse({ fragment }));
+    // Send the raw fragment data
+    res.status(200).send(data);
   } catch (err) {
     logger.error(
       {
