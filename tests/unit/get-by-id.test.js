@@ -24,33 +24,6 @@ describe('GET /v1/fragments/:id tests', () => {
       .expect(404);
   });
 
-  // Retrieve an existing fragment
-  test('retrieve an existing fragment', async () => {
-    const email = 'user1@email.com';
-    const hashedEmail = hash(email);
-
-    const fragment = new Fragment({
-      ownerId: hashedEmail,
-      type: 'text/plain',
-      size: 11,
-    });
-
-    await fragment.save();
-    await fragment.setData(Buffer.from('Hello World'));
-
-    const res = await request(app)
-      .get(`/v1/fragments/${fragment.id}`)
-      .auth(email, 'password1')
-      .expect(200);
-
-    // Verify the response
-    expect(res.body.status).toBe('ok');
-    expect(res.body.fragment).toBeTruthy();
-    expect(res.body.fragment.id).toBe(fragment.id);
-    expect(res.body.fragment.type).toBe('text/plain');
-    expect(res.body.fragment.size).toBe(11);
-  });
-
   test("cannot retrieve another user's fragment", async () => {
     const user1Email = 'user1@email.com';
     const hashedUser1Email = hash(user1Email);
@@ -69,5 +42,29 @@ describe('GET /v1/fragments/:id tests', () => {
       .get(`/v1/fragments/${fragment.id}`)
       .auth('user2@email.com', 'password2')
       .expect(404);
+  });
+
+  test('retrieve existing text fragment returns raw data with correct type', async () => {
+    const email = 'user1@email.com';
+    const hashedEmail = hash(email);
+    const testData = 'Hello World';
+
+    const fragment = new Fragment({
+      ownerId: hashedEmail,
+      type: 'text/plain',
+      size: testData.length,
+    });
+
+    await fragment.save();
+    await fragment.setData(Buffer.from(testData));
+
+    const res = await request(app)
+      .get(`/v1/fragments/${fragment.id}`)
+      .auth(email, 'password1')
+      .expect(200)
+      .expect('Content-Type', 'text/plain');
+
+    // Compare the response body (Buffer) with our test data
+    expect(res.text).toBe(testData);
   });
 });
