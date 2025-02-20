@@ -24,8 +24,14 @@ app.use(pino);
 // Use helmetjs security middleware
 app.use(helmet());
 
-// Use CORS middleware so we can make requests across origins
-app.use(cors());
+// More detailed CORS config
+app.use(
+  cors({
+    origin: '*', // Allow all origins
+    methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+    allowedHeaders: ['Content-Type', 'Authorization'],
+  })
+);
 
 // Use gzip/deflate compression middleware
 app.use(compression());
