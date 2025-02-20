@@ -117,8 +117,14 @@ class Fragment {
     // Update relevant fields
     this.size = data.length;
     this.updated = new Date().toISOString();
-    await writeFragmentData(this.ownerId, this.id, data);
-    await this.save();
+    // Run these promises in parallel since they don't depend on each other
+
+    await Promise.all([
+      // Save the fragment data
+      writeFragmentData(this.ownerId, this.id, data),
+      // Save the updated metadata
+      this.save(),
+    ]);
   }
 
   /**
