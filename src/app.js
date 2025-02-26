@@ -27,6 +27,8 @@ app.use(helmet());
 // More detailed CORS config
 app.use(
   cors({
+    // Allow credentials to be sent with requests
+    credentials: true,
     origin: '*', // Allow all origins
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
     allowedHeaders: ['Content-Type', 'Authorization'],
