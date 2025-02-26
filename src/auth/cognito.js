@@ -43,24 +43,42 @@ jwtVerifier
   });
 
 module.exports.strategy = () =>
-  // For our Passport authentication strategy, we'll look for the Bearer Token
-  // in the Authorization header, then verify that with our Cognito JWT Verifier.
   new BearerStrategy(async (token, done) => {
     try {
-      // Verify this JWT
-      const user = await jwtVerifier.verify(token);
-      logger.debug({ user }, 'verified user token');
+      console.log('Verifying Token:', {
+        userPoolId: process.env.AWS_COGNITO_POOL_ID,
+        clientId: process.env.AWS_COGNITO_CLIENT_ID,
+        tokenLength: token.length,
+        tokenHeader: token.split('.')[0],
+      });
 
-      // Create a user, but only bother with their email
+      // Decode token to inspect its contents
+      const decoded = require('jwt-decode')(token);
+      console.log('Decoded Token:', {
+        sub: decoded.sub,
+        aud: decoded.aud,
+        exp: decoded.exp,
+        email: decoded.email,
+        username: decoded['cognito:username'],
+        currentTime: Math.floor(Date.now() / 1000),
+      });
+
+      const user = await jwtVerifier.verify(token);
+
+      console.log('Verification Successful:', {
+        email: user.email,
+        username: user['cognito:username'],
+      });
+
       done(null, user.email);
     } catch (err) {
-      logger.error({ err, token }, 'could not verify token');
+      console.error('Token Verification FAILED:', {
+        errorName: err.name,
+        errorMessage: err.message,
+        errorStack: err.stack,
+      });
       done(null, false);
     }
   });
-
-// Previously we defined `authenticate()` like this:
-// module.exports.authenticate = () => passport.authenticate('bearer', { session: false });
-//
 // Now we'll delegate the authorization to our authorize middleware
 module.exports.authenticate = () => authorize('bearer');
