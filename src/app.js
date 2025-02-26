@@ -9,7 +9,7 @@ const { createErrorResponse } = require('./response');
 // modifications to src/app.js
 const passport = require('passport');
 
-const authenticate = require('./auth');
+const { authenticate } = require('./auth');
 
 const logger = require('./logger');
 const pino = require('pino-http')({
