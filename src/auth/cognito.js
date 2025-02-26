@@ -45,7 +45,8 @@ jwtVerifier
 module.exports.strategy = () =>
   new BearerStrategy(async (token, done) => {
     try {
-      console.log('Verifying Token:', {
+      logger.info({
+        msg: 'Verifying Token',
         userPoolId: process.env.AWS_COGNITO_POOL_ID,
         clientId: process.env.AWS_COGNITO_CLIENT_ID,
         tokenLength: token.length,
@@ -54,7 +55,8 @@ module.exports.strategy = () =>
 
       // Decode token to inspect its contents
       const decoded = require('jwt-decode')(token);
-      console.log('Decoded Token:', {
+      logger.info({
+        msg: 'Decoded Token Details',
         sub: decoded.sub,
         aud: decoded.aud,
         exp: decoded.exp,
@@ -65,14 +67,16 @@ module.exports.strategy = () =>
 
       const user = await jwtVerifier.verify(token);
 
-      console.log('Verification Successful:', {
+      logger.info({
+        msg: 'Verification Successful',
         email: user.email,
         username: user['cognito:username'],
       });
 
       done(null, user.email);
     } catch (err) {
-      console.error('Token Verification FAILED:', {
+      logger.error({
+        msg: 'Token Verification FAILED',
         errorName: err.name,
         errorMessage: err.message,
         errorStack: err.stack,
