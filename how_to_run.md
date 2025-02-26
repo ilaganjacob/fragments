@@ -41,6 +41,33 @@ docker logs fragments
 docker stop fragments
 ```
 
+### EC2 Deployment
+
+```bash
+# Create tarball of project for EC2 deployment
+npm pack
+
+# Copy tarball to EC2 instance (replace with your EC2 DNS)
+scp -i ~/.ssh/your-key-pair.pem fragments-0.0.1.tgz ec2-user@ec2-xx-xx-xx-xx.compute-1.amazonaws.com:
+
+# SSH into your EC2 instance
+ssh -i ~/.ssh/your-key-pair.pem ec2-user@ec2-xx-xx-xx-xx.compute-1.amazonaws.com
+
+# On EC2: Extract the tarball
+tar -xzf fragments-0.0.1.tgz
+cd package
+
+# On EC2: Install Docker
+sudo yum install -y docker
+sudo systemctl start docker
+sudo usermod -a -G docker ec2-user
+# Log out and log back in for group changes to take effect
+
+# On EC2: Build and run Docker container
+docker build -t fragments:latest .
+docker run --rm --name fragments --env-file env.jest -p 8080:8080 -d fragments:latest
+```
+
 ### API Testing
 
 ```bash
@@ -86,6 +113,20 @@ npm run test:watch
 
 Run these commands from the `fragments-ui/` directory:
 
+### Environment Configuration
+
+Update your existing `.env` file in fragments-ui with your EC2 instance information:
+
+```ini
+# For local development
+API_URL=http://localhost:8080
+
+# For EC2 connection (uncomment and update with your EC2 public DNS)
+# API_URL=http://ec2-xx-xx-xx-xx.compute-1.amazonaws.com:8080
+```
+
+When switching between local and EC2 development, simply update the API_URL value.
+
 ### Start Options
 
 ```bash
@@ -102,8 +143,13 @@ npm run build
 # Build the Docker image
 docker build -t fragments-ui:latest .
 
-# Run the UI container
+# Run the UI container locally
 docker run --rm --name fragments-ui -p 1234:80 fragments-ui:latest
+
+# Run with environment variables to connect to EC2
+docker run --rm --name fragments-ui \
+  -e API_URL=http://ec2-xx-xx-xx-xx.compute-1.amazonaws.com:8080 \
+  -p 1234:80 fragments-ui:latest
 
 # Run in detached mode
 docker run --rm --name fragments-ui -p 1234:80 -d fragments-ui:latest
@@ -111,3 +157,21 @@ docker run --rm --name fragments-ui -p 1234:80 -d fragments-ui:latest
 # Stop container
 docker stop fragments-ui
 ```
+
+### Connecting UI to EC2
+
+When running the fragments-ui locally but connecting to an EC2-hosted fragments API:
+
+1. Update your `.env` file to point to your EC2 instance:
+
+   ```ini
+   API_URL=http://ec2-xx-xx-xx-xx.compute-1.amazonaws.com:8080
+   ```
+
+2. Start the UI:
+
+   ```bash
+   npm start
+   ```
+
+3. If you've configured AWS Cognito for both your UI and API with the same user pool, you should be able to authenticate and interact with your EC2-hosted API.
