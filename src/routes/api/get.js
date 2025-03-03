@@ -23,7 +23,7 @@ module.exports = async (req, res) => {
       {
         expand,
       },
-      'Expand paramter detected'
+      'Expand parameter detected'
     );
 
     // Get the fragments for the current user
