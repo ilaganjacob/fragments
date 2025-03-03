@@ -17,15 +17,25 @@ module.exports = async (req, res) => {
       'Incoming get fragments request'
     );
 
+    const expand = req.query.expand === '1';
+
+    logger.debug(
+      {
+        expand,
+      },
+      'Expand paramter detected'
+    );
+
     // Get the fragments for the current user
     // 'false' means we only want fragment ids
     // 'true' gives full fragments
-    const fragments = await Fragment.byUser(req.user, false);
+    const fragments = await Fragment.byUser(req.user, expand);
 
     // Debug log: Fragment retrieval details
     logger.debug(
       {
         fragmentCount: fragments.length,
+        expanded: expand,
       },
       'Fragments received for user'
     );
@@ -35,8 +45,9 @@ module.exports = async (req, res) => {
       {
         ownerId: req.user,
         fragmentCount: fragments.length,
+        expanded: expand,
       },
-      'Successfully returned user fragment IDs'
+      'Successfully returned user fragments'
     );
     // Return the list of fragment IDs
     res.status(200).json(createSuccessResponse({ fragments }));
