@@ -47,7 +47,7 @@ jobs:
     steps:
       # https://github.com/marketplace/actions/hadolint-action
       - uses: actions/checkout@v4
-      - uses: hadolint:hadolint-action@v3.1.0
+      - uses: hadolint/hadolint-action@v3.1.0
         with:
           dockerfile: Dockerfile
 
