@@ -27,7 +27,7 @@ COPY --chown=fragments:fragments package\*.json ./
 
 # Install dependencies for production only
 
-RUN npm ci --only=production
+RUN npm install --only=production
 
 # Copy source code with explicit ownership
 
