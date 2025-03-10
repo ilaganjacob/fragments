@@ -149,7 +149,9 @@ class Fragment {
    * Returns the formats into which this fragment type can be converted
    * @returns {Array<string>} list of supported mime types
    */
+  // Update the formats getter to include appropriate conversions
   get formats() {
+    const baseFormat = [this.mimeType];
     // Just return this for now since it's the only supported type
     return ['text/plain'];
   }
