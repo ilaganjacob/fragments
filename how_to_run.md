@@ -155,7 +155,7 @@ docker run --rm --name fragments-ui \
 docker run --rm --name fragments-ui -p 1234:80 -d fragments-ui:latest
 
 ## THIS IS THE COMMAND THAT WORKS
-docker run --rm --name fragments --env-file .env -e LOG_LEVEL=debug -p 8080:8080 -d fragments:latest
+docker run --rm --name fragments --env-file .env -e LOG_LEVEL=debug -p 8080:8080 -d ilaganjacob/fragments:latest
 ##
 
 # Stop container
