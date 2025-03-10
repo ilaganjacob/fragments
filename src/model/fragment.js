@@ -152,8 +152,21 @@ class Fragment {
   // Update the formats getter to include appropriate conversions
   get formats() {
     const baseFormat = [this.mimeType];
-    // Just return this for now since it's the only supported type
-    return ['text/plain'];
+
+    // Add conversion options based on mime type
+    if (this.mimeType === 'text/markdown') {
+      return [...baseFormat, 'text/html', 'text/plain'];
+    }
+
+    if (this.mimeType === 'text/html') {
+      return [...baseFormat, 'text/plain'];
+    }
+
+    if (this.mimeType === 'application/json') {
+      return [...baseFormat, 'text/plain'];
+    }
+
+    return baseFormat;
   }
 
   /**
