@@ -1,4 +1,8 @@
-// src/routes/api/get-by-id.js
+// In src/routes/api/get-by-id.js
+
+// Make sure you've installed the markdown-it library
+// npm install markdown-it
+
 const path = require('path');
 const { Fragment } = require('../../model/fragment');
 const { createErrorResponse } = require('../../response');
@@ -11,133 +15,103 @@ module.exports = async (req, res) => {
       {
         method: req.method,
         path: req.path,
+        params: req.params,
         user: req.user,
-        fragmentId: req.params.id,
       },
-      'Incoming GET fragment by ID request'
+      'GET fragment by ID request'
     );
 
-    // Check if the id includes an extension
+    // Extract the id and potential extension
     let id = req.params.id;
-    let extension = path.extname(id);
+    const extension = path.extname(id);
     let desiredType;
 
-    // If there's an extension, remove it from the id and store the extension
+    // If there's an extension, parse it
     if (extension) {
-      id = id.replace(extension, '');
-      extension = id.toLowerCase().substring(1); // Remove the leading '.'
+      // Remove the extension from the id (everything from the last period)
+      id = id.substring(0, id.lastIndexOf('.'));
 
-      // Map extensions to content types
-      const extensionToType = {
+      // Get the extension without the dot and map to content type
+      const ext = extension.toLowerCase().substring(1);
+
+      // Map extension to content type
+      const extensionMap = {
         txt: 'text/plain',
         html: 'text/html',
         md: 'text/markdown',
         json: 'application/json',
+        // Add other mappings as needed
       };
 
-      desiredType = extensionToType[extension];
+      desiredType = extensionMap[ext];
 
       if (!desiredType) {
+        logger.warn(`Unsupported extension: ${extension}`);
         return res
           .status(415)
           .json(createErrorResponse(415, `Unsupported extension: ${extension}`));
       }
     }
 
-    // Retrieve the specific fragment
-    const fragment = await Fragment.byId(req.user, id);
+    try {
+      // Try to get the fragment by ID - this might throw if not found
+      const fragment = await Fragment.byId(req.user, id);
 
-    // Get the raw fragment data
-    const data = await fragment.getData();
+      // Get the raw fragment data
+      const data = await fragment.getData();
 
-    // If there's a desired type and it's different from the original type, we need to convert the data
-    if (desiredType && fragment.mimeType !== desiredType) {
-      // Check fi the conversion is supported
-      if (!fragment.formats.includes(desiredType)) {
-        return res
-          .status(415)
-          .json(createErrorResponse(415, `Unsupported conversion: ${desiredType}`));
-      }
-
-      try {
-        const convertedData = convert(data, fragment.mimeType, desiredType);
-
-        // Set the Content-Type header to the desired type
-        res.setHeader('Content-Type', desiredType);
-
-        // Info log: Successful conversion
-        logger.info(
-          {
-            ownerId: req.user,
-            fragmentId: id,
-            sourceType: fragment.mimeType,
-            targetType: desiredType,
-          },
-          'Successfully converted fragment'
-        );
-
-        // Send the converted data
-        return res.status(200).send(convertedData);
-      } catch (convertErr) {
-        logger.error(
-          {
-            err: convertErr,
-            ownerId: req.user,
-            fragmentId: id,
-            sourceType: fragment.mimeType,
-            targetType: desiredType,
-          },
-          'Error converting fragment'
-        );
-        return res
-          .status(415)
-          .json(
-            createErrorResponse(415, `Error converting from ${fragment.mimeType} to ${desiredType}`)
+      // If there's a desired type and it's different from the original type,
+      // we need to convert the data
+      if (desiredType && fragment.mimeType !== desiredType) {
+        // Check if this conversion is supported
+        if (!fragment.formats.includes(desiredType)) {
+          logger.warn(
+            {
+              fragmentId: id,
+              fromType: fragment.mimeType,
+              toType: desiredType,
+            },
+            'Unsupported conversion'
           );
+
+          return res
+            .status(415)
+            .json(
+              createErrorResponse(
+                415,
+                `Unsupported conversion from ${fragment.mimeType} to ${desiredType}`
+              )
+            );
+        }
+
+        try {
+          const convertedData = convert(data, fragment.mimeType, desiredType);
+
+          // Set Content-Type header and send converted data
+          res.setHeader('Content-Type', desiredType);
+          return res.status(200).send(convertedData);
+        } catch (err) {
+          logger.error({ err }, 'Conversion error');
+          return res.status(415).json(createErrorResponse(415, `Error converting: ${err.message}`));
+        }
       }
+
+      // No conversion needed, send original data with original type
+      res.setHeader('Content-Type', fragment.type);
+      return res.status(200).send(data);
+    } catch (err) {
+      // If the fragment doesn't exist, return 404
+      if (err.message.includes('does not exist')) {
+        logger.warn({ id }, 'Fragment not found');
+        return res.status(404).json(createErrorResponse(404, `Fragment ${id} not found`));
+      }
+
+      // For other errors, return 500
+      logger.error({ err }, 'Error retrieving fragment');
+      return res.status(500).json(createErrorResponse(500, 'Internal server error'));
     }
-
-    // Set the Content-Type header to match the fragment's type
-    res.setHeader('Content-Type', fragment.type);
-
-    // Debug log: Fragment retrieval details
-    logger.debug(
-      {
-        fragmentId: fragment.id,
-        type: fragment.type,
-        size: fragment.size,
-        dataSize: data.length, // Add actual data size
-      },
-      'Retrieved fragment data and metadata'
-    );
-
-    // Info log: Successful fragment retrieval
-    logger.info(
-      {
-        ownerId: req.user,
-        fragmentId: req.params.id,
-      },
-      'Successfully returned specific fragment'
-    );
-
-    // Send the raw fragment data
-    res.status(200).send(data);
   } catch (err) {
-    logger.error(
-      {
-        err,
-        ownerId: req.user,
-        fragmentId: req.params.id,
-      },
-      'Error retrieving fragment'
-    );
-
-    // Handles different types of errors
-    if (err.message.includes('does not exist')) {
-      // Specific error for non-existent fragment
-      res.status(404).json(createErrorResponse(404, 'Fragment not found'));
-    } else {
-      res.status(500).json(createErrorResponse(500, 'Internal Server Error'));
-    }
+    logger.error({ err }, 'Unexpected error processing request');
+    return res.status(500).json(createErrorResponse(500, 'Internal server error'));
   }
 };
