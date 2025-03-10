@@ -47,3 +47,5 @@ function convert(data, fromType, toType) {
   // If we don't know how to convert between these types, throw
   throw new Error(`Unsupported conversion from ${fromType} to ${toType}`);
 }
+
+module.exports = convert;
