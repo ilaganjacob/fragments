@@ -178,7 +178,7 @@ class Fragment {
     const { type } = contentType.parse(value);
 
     // Text types (text/*)
-    if (type === 'text/') {
+    if (type.startsWith('text/')) {
       return true;
     }
 
