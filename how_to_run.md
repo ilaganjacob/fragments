@@ -158,6 +158,9 @@ docker run --rm --name fragments-ui -p 1234:80 -d fragments-ui:latest
 docker run --rm --name fragments --env-file .env -e LOG_LEVEL=debug -p 8080:8080 -d ilaganjacob/fragments:latest
 ##
 
+## Copy env file:
+scp -i ~/.ssh/ccp555-key-pair.pem .env ec2-user@ec2-34-229-87-57.compute-1.amazonaws.com:package/.env
+
 # Stop container
 docker stop fragments-ui
 ```
