@@ -30,11 +30,6 @@ class Fragment {
       throw new Error('Missing type ');
     }
 
-    // Use includes because type can have a charset
-    if (!type.includes('text/plain') || obj.type !== 'text/plain') {
-      throw new Error('Type must include "text/plain"');
-    }
-
     if (typeof size !== 'number' || size < 0) {
       throw new Error('size must be a non-negative number');
     }
