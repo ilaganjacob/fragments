@@ -1,11 +1,9 @@
 const { Fragment } = require('../../model/fragment');
 const { createSuccessResponse, createErrorResponse } = require('../../response');
 const logger = require('../../logger');
-
-/*
-Get a fragment's metadata
-*/
-
+/**
+ * Get a fragment's metadata
+ */
 module.exports = async (req, res) => {
   try {
     const { id } = req.params;
@@ -17,15 +15,34 @@ module.exports = async (req, res) => {
         fragmentId: id,
         ownerId: req.user,
       },
-      'Getting fragment data'
+      'Getting fragment metadata'
     );
 
+    // Try to get the fragment
     try {
-      const fragment = await Fragment.get(id);
+      const fragment = await Fragment.byId(req.user, id);
 
-      logger.info({})
+      logger.info(
+        {
+          fragmentId: id,
+          ownerId: req.user,
+        },
+        'Fragment metadata retrieved successfully'
+      );
 
-      res.status(200).json(createSuccessResponse(200, 'Fragment found', fragment));
+      // Return the fragment metadata
+      res.status(200).json(
+        createSuccessResponse({
+          fragment: {
+            id: fragment.id,
+            ownerId: fragment.ownerId,
+            created: fragment.created,
+            updated: fragment.updated,
+            type: fragment.type,
+            size: fragment.size,
+          },
+        })
+      );
     } catch (err) {
       if (err.message.includes('does not exist')) {
         logger.warn({ err, fragmentId: id }, 'Fragment not found');
