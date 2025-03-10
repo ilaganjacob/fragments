@@ -176,7 +176,18 @@ class Fragment {
    */
   static isSupportedType(value) {
     const { type } = contentType.parse(value);
-    return type === 'text/plain';
+
+    // Text types (text/*)
+    if (type === 'text/') {
+      return true;
+    }
+
+    // JSON type
+    if (type === 'application/json') {
+      return true;
+    }
+
+    return false;
   }
 }
 
