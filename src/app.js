@@ -29,9 +29,10 @@ app.use(
   cors({
     // Allow credentials to be sent with requests
     credentials: true,
-    origin: '*', // Allow all origins
+    origin: ['http://localhost:8000', 'http://localhost:1234', '*'],
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
     allowedHeaders: ['Content-Type', 'Authorization'],
+    exposedHeaders: ['Location'],
   })
 );
 
