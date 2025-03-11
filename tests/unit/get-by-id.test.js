@@ -67,4 +67,15 @@ describe('GET /v1/fragments/:id tests', () => {
     // Compare the response body (Buffer) with our test data
     expect(res.text).toBe(testData);
   });
+  // Add to tests/unit/get-by-id.test.js
+  test('returns 415 for unsupported extension', async () => {
+    await request(app)
+      .get('/v1/fragments/non-existent-id.unsupported')
+      .auth('user1@email.com', 'password1')
+      .expect(415)
+      .expect('Content-Type', /json/)
+      .expect((res) => {
+        expect(res.body.error.message).toContain('Unsupported extension');
+      });
+  });
 });
