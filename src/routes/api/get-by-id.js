@@ -1,8 +1,5 @@
 // In src/routes/api/get-by-id.js
 
-// Make sure you've installed the markdown-it library
-// npm install markdown-it
-
 const path = require('path');
 const { Fragment } = require('../../model/fragment');
 const { createErrorResponse } = require('../../response');
@@ -28,10 +25,10 @@ module.exports = async (req, res) => {
 
     // If there's an extension, parse it
     if (extension) {
-      // Remove the extension from the id (everything from the last period)
+      // Remove the extension from the id
       id = id.substring(0, id.lastIndexOf('.'));
 
-      // Get the extension without the dot and map to content type
+      // Get the extension without the dot
       const ext = extension.toLowerCase().substring(1);
 
       // Map extension to content type
@@ -54,7 +51,7 @@ module.exports = async (req, res) => {
     }
 
     try {
-      // Try to get the fragment by ID - this might throw if not found
+      // Try to get the fragment by ID
       const fragment = await Fragment.byId(req.user, id);
 
       // Get the raw fragment data
