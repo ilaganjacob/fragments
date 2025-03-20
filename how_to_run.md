@@ -32,7 +32,7 @@ docker run --rm --name fragments --env-file .env -p 8080:8080 fragments:latest
 docker run --rm --name fragments --env-file env.jest -e LOG_LEVEL=debug -p 8080:8080 fragments:latest
 
 # Run in background (detached)
-docker run --rm --name fragments --env-file env.jest -e LOG_LEVEL=debug -p 8080:8080 -d fragments:latest
+docker run --rm --name fragments --env-file env.jest -e LOG_LEVEL=debug -p 8080:8080 -d ilaganjacob/fragments:latest
 
 
 ## THIS IS THE COMMAND THAT WORKS
