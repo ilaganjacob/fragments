@@ -34,13 +34,6 @@ router.get('/', (req, res) => {
       version,
     })
   );
-  // **** OLD CODE ****
-  // res.status(200).json({
-  //   status: 'ok',
-  //   author,
-  //   githubUrl: 'https://github.com/ilaganjacob/fragments',
-  //   version,
-  // });
 });
 
 module.exports = router;
