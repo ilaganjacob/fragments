@@ -16,7 +16,7 @@ WORKDIR /app
 RUN chown -R fragments:fragments /app
 
 # Switch to non-root user
-#USER fragments
+USER fragments
 
 # Copy package files with explicit ownership
 COPY --chown=fragments:fragments package*.json ./
@@ -49,7 +49,7 @@ WORKDIR /app
 COPY --from=builder --chown=fragments:fragments /app .
 
 # Switch to non-root user for runtime
-USER fragments
+#USER fragments
 
 # Expose port
 EXPOSE 8080
