@@ -88,3 +88,11 @@ jobs:
           environment-variables: |
             LOG_LEVEL=debug
             NODE_ENV=production
+
+      - name: Deploy Amazon ECS task definition
+        uses: aws-actions/amazon-ecs-deploy-task-definition@v2
+        with:
+          task-definition: ${{ steps.update-task-def.outputs.task-definition }}
+          cluster: fragments-cluster
+          service: fragments-service
+          wait-for-service-stability: true
