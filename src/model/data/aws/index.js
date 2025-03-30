@@ -1,4 +1,9 @@
-const MemoryDB = require('./memory-db');
+// XXX: temporary use of memory-db until we add DynamoDB
+const MemoryDB = require('../memory/memory-db');
+
+const s3Client = require('./s3Client');
+const { PutObjectCommand } = require('@aws-sdk/client-s3');
+const logger = require('../../../logger');
 
 // Create two in-memory databases: one for fragment metadata and the other for raw data
 const data = new MemoryDB();
@@ -21,9 +26,29 @@ async function readFragment(ownerId, id) {
   return typeof serialized === 'string' ? JSON.parse(serialized) : serialized;
 }
 
-// Write a fragment's data buffer to memory db. Returns a Promise
-function writeFragmentData(ownerId, id, buffer) {
-  return data.put(ownerId, id, buffer);
+// Writes a fragment's data to an S3 Object in a Bucket
+// https://github.com/awsdocs/aws-sdk-for-javascript-v3/blob/main/doc_source/s3-example-creating-buckets.md#upload-an-existing-object-to-an-amazon-s3-bucket
+async function writeFragmentData(ownerId, id, data) {
+  // Create the PUT API params from our details
+  const params = {
+    Bucket: process.env.AWS_S3_BUCKET_NAME,
+    // Our key will be a mix of the ownerID and fragment id, written as a path
+    Key: `${ownerId}/${id}`,
+    Body: data,
+  };
+
+  // Create a PUT Object command to send to S3
+  const command = new PutObjectCommand(params);
+
+  try {
+    // Use our client to send the command
+    await s3Client.send(command);
+  } catch (err) {
+    // If anything goes wrong, log enough info that we can debug
+    const { Bucket, Key } = params;
+    logger.error({ err, Bucket, Key }, 'Error uploading fragment data to S3');
+    throw new Error('unable to upload fragment data');
+  }
 }
 
 // Read a fragment's data from memory db. Returns a Promise
