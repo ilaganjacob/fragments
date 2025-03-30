@@ -2,7 +2,7 @@
 const MemoryDB = require('../memory/memory-db');
 
 const s3Client = require('./s3Client');
-const { PutObjectCommand, GetObjectCommand } = require('@aws-sdk/client-s3');
+const { PutObjectCommand, GetObjectCommand, DeleteObjectCommand } = require('@aws-sdk/client-s3');
 const logger = require('../../../logger');
 
 // Create two in-memory databases: one for fragment metadata and the other for raw data
@@ -111,14 +111,27 @@ async function listFragments(ownerId, expand = false) {
   return parsedFragments.map((fragment) => fragment.id);
 }
 
-// Delete a fragment's metadata and data from memory db. Returns a Promise
-function deleteFragment(ownerId, id) {
-  return Promise.all([
-    // Delete metadata
-    metadata.del(ownerId, id),
-    // Delete data
-    data.del(ownerId, id),
-  ]);
+async function deleteFragment(ownerId, id) {
+  // Create the DELETE API params for S3
+  const params = {
+    Bucket: process.env.AWS_S3_BUCKET_NAME,
+    Key: `${ownerId}/${id}`,
+  };
+
+  try {
+    // Delete from S3
+    const command = new DeleteObjectCommand(params);
+    await s3Client.send(command);
+    logger.debug({ ownerId, id }, 'Fragment data deleted from S3');
+
+    // Also delete metadata from memory
+    await metadata.del(ownerId, id);
+    logger.debug({ ownerId, id }, 'Fragment metadata deleted from memory');
+  } catch (err) {
+    const { Bucket, Key } = params;
+    logger.error({ err, Bucket, Key }, 'Error deleting fragment from S3');
+    throw new Error('unable to delete fragment');
+  }
 }
 
 module.exports.listFragments = listFragments;
