@@ -3,12 +3,10 @@
 
 # 1. Create a JSON fragment
 POST http://localhost:8080/v1/fragments
-# Use HTTP Basic Auth
+Content-Type: application/json
 [BasicAuth]
 user1@email.com:password1
-# Set the Content-Type to JSON
-Content-Type: application/json
-# Use a JSON fragment with a "service" property set to "DynamoDB"
+
 { "service": "DynamoDB" }
 
 # 2. Confirm that the server returns a 201 and capture the URL and fragment id
@@ -24,7 +22,6 @@ user1@email.com:password1
 
 # Verify we get a 200 and all metadata properties match what we expect
 HTTP/1.1 200
-Content-Type: application/json; charset=utf-8
 [Asserts]
 jsonpath "$.status" == "ok"
 jsonpath "$.fragment.id" == {{fragment1_id}}
@@ -36,9 +33,9 @@ jsonpath "$.fragment.size" == 23 # Size of JSON: { "service": "DynamoDB" }
 
 # 4. POST a second Markdown fragment
 POST http://localhost:8080/v1/fragments
+Content-Type: text/markdown
 [BasicAuth]
 user1@email.com:password1
-Content-Type: text/markdown
 `DynamoDB is **great**.`
 
 # 5. Confirm 201 and capture the URL and fragment id
@@ -53,7 +50,6 @@ GET {{fragment2_url}}/info
 user1@email.com:password1
 
 HTTP/1.1 200
-Content-Type: application/json; charset=utf-8
 [Asserts]
 jsonpath "$.status" == "ok"
 jsonpath "$.fragment.id" == {{fragment2_id}}
@@ -70,7 +66,6 @@ user1@email.com:password1
 
 # Verify we get both fragments in our list
 HTTP/1.1 200
-Content-Type: application/json; charset=utf-8
 [Asserts]
 jsonpath "$.status" == "ok"
 jsonpath "$.fragments" includes {{fragment1_id}}
@@ -103,10 +98,7 @@ GET http://localhost:8080/v1/fragments
 user1@email.com:password1
 
 HTTP/1.1 200
-Content-Type: application/json; charset=utf-8
 [Asserts]
 jsonpath "$.status" == "ok"
-# First fragment should NOT be in the list (was deleted)
 not jsonpath "$.fragments" includes {{fragment1_id}}
-# Second fragment should still be in the list
 jsonpath "$.fragments" includes {{fragment2_id}}
