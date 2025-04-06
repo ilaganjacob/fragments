@@ -5,7 +5,7 @@ const s3Client = require('./s3Client');
 const ddbDocClient = require('./ddbDocClient');
 const { PutObjectCommand, GetObjectCommand, DeleteObjectCommand } = require('@aws-sdk/client-s3');
 const logger = require('../../../logger');
-const { PutCommand, GetCommand } = require('@aws-sdk/lib-dynamodb');
+const { PutCommand, GetCommand, QueryCommand, DeleteCommand } = require('@aws-sdk/lib-dynamodb');
 
 // Create two in-memory databases: one for fragment metadata and the other for raw data
 //const data = new MemoryDB();
@@ -124,21 +124,82 @@ async function readFragmentData(ownerId, id) {
   }
 }
 
-// Get a list of fragment ids/objects for the given user from memory db. Returns a Promise
+// Get a list of fragments, either ids-only, or full Objects, for the given user.
+// Returns a Promise<Array<Fragment>|Array<string>|undefined>
 async function listFragments(ownerId, expand = false) {
-  const fragments = await metadata.query(ownerId);
-  const parsedFragments = fragments.map((fragment) => JSON.parse(fragment));
+  // Configure our QUERY params, with the name of the table and the query expression
+  const params = {
+    TableName: process.env.AWS_DYNAMODB_TABLE_NAME,
+    // Specify that we want to get all items where the ownerId is equal to the
+    // `:ownerId` that we'll define below in the ExpressionAttributeValues.
+    KeyConditionExpression: 'ownerId = :ownerId',
+    // Use the `ownerId` value to do the query
+    ExpressionAttributeValues: {
+      ':ownerId': ownerId,
+    },
+  };
 
-  // If we don't get anything back, or are supposed to give expanded fragments, return
-  if (expand || !fragments) {
-    return parsedFragments;
+  // Limit to only `id` if we aren't supposed to expand. Without doing this
+  // we'll get back every attribute.  The projection expression defines a list
+  // of attributes to return, see:
+  // https://docs.aws.amazon.com/amazondynamodb/latest/developerguide/Expressions.ProjectionExpressions.html
+  if (!expand) {
+    params.ProjectionExpression = 'id';
   }
 
-  // Otherwise, map to only send back the ids
-  return parsedFragments.map((fragment) => fragment.id);
+  // Create a QUERY command to send to DynamoDB
+  const command = new QueryCommand(params);
+
+  try {
+    // Wait for the data to come back from AWS
+    const data = await ddbDocClient.send(command);
+
+    // If we haven't expanded to include all attributes, remap this array from
+    // [ {"id":"b9e7a264-630f-436d-a785-27f30233faea"}, {"id":"dad25b07-8cd6-498b-9aaf-46d358ea97fe"} ,... ] to
+    // [ "b9e7a264-630f-436d-a785-27f30233faea", "dad25b07-8cd6-498b-9aaf-46d358ea97fe", ... ]
+    return !expand ? data?.Items.map((item) => item.id) : data?.Items;
+  } catch (err) {
+    logger.error({ err, params }, 'error getting all fragments for user from DynamoDB');
+    throw err;
+  }
 }
 
+// Delete a fragment's metadata from DynamoDB and its data from S3. Returns a Promise
 async function deleteFragment(ownerId, id) {
+  try {
+    logger.debug({ ownerId, id }, 'Deleting fragment from DynamoDB and S3');
+
+    // Create params for deleting the metadata in DynamoDB
+    const dynamoParams = {
+      TableName: process.env.AWS_DYNAMODB_TABLE_NAME,
+      // The key needs both the partition key (ownerId) and sort key (id)
+      Key: { ownerId, id },
+    };
+
+    // Create params for S3
+    const s3Params = {
+      Bucket: process.env.AWS_S3_BUCKET_NAME,
+      Key: `${ownerId}/${id}`,
+    };
+
+    // Create command objects to send to DynamoDB and S3
+    const dynamoCommand = new DeleteCommand(dynamoParams);
+    const s3Command = new DeleteObjectCommand(s3Params);
+
+    // Execute both delete commands in parallel
+    // If either fails, the whole operation fails
+    await Promise.all([
+      // Delete metadata from DynamoDB
+      ddbDocClient.send(dynamoCommand),
+      // Delete data from S3
+      s3Client.send(s3Command),
+    ]);
+
+    logger.info({ ownerId, id }, 'Fragment deleted successfully from DynamoDB and S3');
+  } catch (err) {
+    logger.error({ err, ownerId, id }, 'Error deleting fragment from DynamoDB and/or S3');
+    throw err;
+  }
   // Create the DELETE API params for S3
   const params = {
     Bucket: process.env.AWS_S3_BUCKET_NAME,
