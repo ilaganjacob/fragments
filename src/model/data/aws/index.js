@@ -5,6 +5,7 @@ const s3Client = require('./s3Client');
 const ddbDocClient = require('./ddbDocClient');
 const { PutObjectCommand, GetObjectCommand, DeleteObjectCommand } = require('@aws-sdk/client-s3');
 const logger = require('../../../logger');
+const { PutCommand, GetCommand } = require('@aws-sdk/lib-dynamodb');
 
 // Create two in-memory databases: one for fragment metadata and the other for raw data
 //const data = new MemoryDB();
@@ -31,21 +32,46 @@ const streamToBuffer = (stream) =>
     stream.on('end', () => resolve(Buffer.concat(chunks)));
   });
 
-// Write a fragment's metadata to memory db. Returns a Promise<void>
+// Writes a fragment to DynamoDB. Returns a Promise.
 function writeFragment(fragment) {
-  // Simulate db/network serialization of the value, storing only JSON representation.
-  // This is important because it's how things will work later with AWS data stores.
-  const serialized = JSON.stringify(fragment);
-  return metadata.put(fragment.ownerId, fragment.id, serialized);
+  // Configure our PUT params, with the name of the table and item (attributes and keys)
+  const params = {
+    TableName: process.env.AWS_DYNAMODB_TABLE_NAME,
+    Item: fragment,
+  };
+
+  // Create a PUT command to send to DynamoDB
+  const command = new PutCommand(params);
+
+  try {
+    return ddbDocClient.send(command);
+  } catch (err) {
+    logger.warn({ err, params, fragment }, 'error writing fragment to DynamoDB');
+    throw err;
+  }
 }
 
-// Read a fragment's metadata from memory db. Returns a Promise<Object>
+// Reads a fragment from DynamoDB. Returns a Promise<fragment|undefined>
 async function readFragment(ownerId, id) {
-  // NOTE: this data will be raw JSON, we need to turn it back into an Object.
-  // You'll need to take care of converting this back into a Fragment instance
-  // higher up in the callstack.
-  const serialized = await metadata.get(ownerId, id);
-  return typeof serialized === 'string' ? JSON.parse(serialized) : serialized;
+  // Configure our GET params, with the name of the table and key (partition key + sort key)
+  const params = {
+    TableName: process.env.AWS_DYNAMODB_TABLE_NAME,
+    Key: { ownerId, id },
+  };
+
+  // Create a GET command to send to DynamoDB
+  const command = new GetCommand(params);
+
+  try {
+    // Wait for the data to come back from AWS
+    const data = await ddbDocClient.send(command);
+    // We may or may not get back any data (e.g., no item found for the given key).
+    // If we get back an item (fragment), we'll return it.  Otherwise we'll return `undefined`.
+    return data?.Item;
+  } catch (err) {
+    logger.warn({ err, params }, 'error reading fragment from DynamoDB');
+    throw err;
+  }
 }
 
 // Writes a fragment's data to an S3 Object in a Bucket
