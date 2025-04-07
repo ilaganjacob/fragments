@@ -160,40 +160,46 @@ async function listFragments(ownerId, expand = false) {
   }
 }
 
-// Delete a fragment's metadata from DynamoDB and its data from S3. Returns a Promise
+// Delete a fragment's metadata from DynamoDB and its data from S3
 async function deleteFragment(ownerId, id) {
-  // Create params for deleting the metadata in DynamoDB
-  const dynamoParams = {
-    TableName: process.env.AWS_DYNAMODB_TABLE_NAME,
-    // The key needs both the partition key (ownerId) and sort key (id)
-    Key: { ownerId, id },
-  };
-
-  // Create params for deleting the data in S3
-  const s3Params = {
-    Bucket: process.env.AWS_S3_BUCKET_NAME,
-    Key: `${ownerId}/${id}`,
-  };
+  logger.debug({ ownerId, id }, 'Deleting fragment from DynamoDB and S3');
 
   try {
-    logger.debug({ ownerId, id }, 'Deleting fragment from DynamoDB and S3');
-
-    // Create command objects
+    // Delete metadata from DynamoDB
+    const dynamoParams = {
+      TableName: process.env.AWS_DYNAMODB_TABLE_NAME,
+      Key: { ownerId, id },
+    };
     const dynamoCommand = new DeleteCommand(dynamoParams);
+
+    // Delete data from S3
+    const s3Params = {
+      Bucket: process.env.AWS_S3_BUCKET_NAME,
+      Key: `${ownerId}/${id}`,
+    };
     const s3Command = new DeleteObjectCommand(s3Params);
 
-    // Execute both delete commands in parallel using Promise.all
-    await Promise.all([
-      // Delete metadata from DynamoDB
-      ddbDocClient.send(dynamoCommand),
-      // Delete data from S3
-      s3Client.send(s3Command),
-    ]);
+    // Execute both delete operations in parallel
+    await Promise.all([ddbDocClient.send(dynamoCommand), s3Client.send(s3Command)]);
 
-    logger.info({ ownerId, id }, 'Fragment deleted successfully from DynamoDB and S3');
+    logger.info({ ownerId, id }, 'Successfully deleted fragment');
+    return true;
   } catch (err) {
-    logger.error({ err, ...s3Params }, 'Error deleting fragment from DynamoDB and/or S3');
-    throw err;
+    // Log the error for debugging purposes
+    logger.error({ err, ownerId, id }, 'Error deleting fragment');
+
+    // Check if this is a "not found" error - in that case, we don't want to throw
+    if (
+      err.name === 'ResourceNotFoundException' ||
+      err.$metadata?.httpStatusCode === 404 ||
+      err.name === 'NoSuchKey'
+    ) {
+      logger.warn({ ownerId, id }, 'Fragment not found - treating as already deleted');
+      return true;
+    }
+
+    // Rethrow any other errors
+    throw new Error(`Unable to delete fragment: ${err.message}`);
   }
 }
 
