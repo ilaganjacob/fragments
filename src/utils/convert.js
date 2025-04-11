@@ -89,7 +89,7 @@ async function convert(data, fromType, toType) {
     try {
       return new Promise((resolve, reject) => {
         const results = [];
-        const csvStream = Readable.from(data.toString())
+        Readable.from(data.toString())
           .pipe(csv())
           .on('data', (data) => results.push(data))
           .on('error', (error) => reject(new Error(`CSV parsing error: ${error.message}`)))
