@@ -91,7 +91,7 @@ module.exports = async (req, res) => {
             },
             'Attempting conversion'
           );
-          const convertedData = convert(data, fragment.mimeType, desiredType);
+          const convertedData = await convert(data, fragment.mimeType, desiredType);
 
           // Set Content-Type header and send converted data
           res.setHeader('Content-Type', desiredType);
