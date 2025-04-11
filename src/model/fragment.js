@@ -169,6 +169,23 @@ class Fragment {
       return [...baseFormat, 'text/plain', 'application/yaml'];
     }
 
+    // For YAML, allow conversion to text and JSON
+    if (this.mimeType === 'application/yaml') {
+      return [...baseFormat, 'text/plain', 'application/json'];
+    }
+
+    // For image types, allow conversion to all other image formats
+    if (this.mimeType.startsWith('image/')) {
+      return [
+        this.mimeType,
+        'image/png',
+        'image/jpeg',
+        'image/webp',
+        'image/gif',
+        'image/avif',
+      ].filter((type) => type !== this.mimeType);
+    }
+
     // Default to just the original format
     return baseFormat;
   }
