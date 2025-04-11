@@ -159,9 +159,14 @@ class Fragment {
       return baseFormat; // Only support the original format
     }
 
-    // For JSON, allow conversion to plain text
+    // For CSV, allow conversion to JSON and plain text
+    if (this.mimeType === 'text/csv') {
+      return [...baseFormat, 'application/json', 'text/plain'];
+    }
+
+    // For JSON, allow conversion to plain text and YAML
     if (this.mimeType === 'application/json') {
-      return [...baseFormat, 'text/plain'];
+      return [...baseFormat, 'text/plain', 'application/yaml'];
     }
 
     // Default to just the original format
@@ -181,11 +186,20 @@ class Fragment {
       return true;
     }
 
-    // JSON type
-    if (type === 'application/json') {
+    // Application types
+    if (type === 'application/json' || type === 'application/yaml') {
       return true;
     }
-
+    // Image types
+    if (
+      type === 'image/png' ||
+      type === 'image/jpeg' ||
+      type === 'image/webp' ||
+      type === 'image/avif' ||
+      type === 'image/gif'
+    ) {
+      return true;
+    }
     return false;
   }
 }
