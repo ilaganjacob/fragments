@@ -1,12 +1,12 @@
 # tests/integration/image-support.hurl
 # Tests for image fragment support
 
-# 1. Create a PNG image fragment
+# 1. Create a PNG image fragment (1x1 transparent PNG)
 POST http://localhost:8080/v1/fragments
 Content-Type: image/png
 [BasicAuth]
 user1@email.com:password1
-file,../test-images/test-image.png;
+base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNk+A8AAQUBAScY42YAAAAASUVORK5CYII=;
 
 # We expect to get back an HTTP 201
 HTTP/1.1 201
@@ -66,7 +66,6 @@ John,30,New York
 Jane,25,Toronto
 Bob,28,Vancouver
 ```
-
 # We expect to get back an HTTP 201
 HTTP/1.1 201
 [Asserts]
@@ -104,7 +103,6 @@ users:
     age: 25
     city: Toronto
 ```
-
 # We expect to get back an HTTP 201
 HTTP/1.1 201
 [Asserts]
