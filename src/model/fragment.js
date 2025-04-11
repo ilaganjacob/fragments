@@ -149,6 +149,8 @@ class Fragment {
     // Start with the base format (the fragment's own type)
     const baseFormat = [this.mimeType];
 
+    console.log('Fragment.formats called for type:', this.mimeType);
+
     // For text/markdown, allow conversion to HTML and plain text
     if (this.mimeType === 'text/markdown') {
       return [...baseFormat, 'text/html', 'text/plain'];
