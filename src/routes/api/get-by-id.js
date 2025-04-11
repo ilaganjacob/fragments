@@ -33,12 +33,16 @@ module.exports = async (req, res) => {
 
       // Map extension to content type
       const extensionMap = {
+        // Text formats
         txt: 'text/plain',
         html: 'text/html',
         md: 'text/markdown',
+        // Data formats
         json: 'application/json',
-        // Add other mappings as needed
-        // Add image formats
+        yaml: 'application/yaml',
+        yml: 'application/yaml',
+        csv: 'text/csv',
+        // Image formats
         png: 'image/png',
         jpg: 'image/jpeg',
         jpeg: 'image/jpeg',
