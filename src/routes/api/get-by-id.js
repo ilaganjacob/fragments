@@ -53,6 +53,9 @@ module.exports = async (req, res) => {
 
       desiredType = extensionMap[ext];
 
+      // Log what's happening for debugging
+      console.log(`Extension: ${ext}, Mapped to: ${desiredType}`);
+
       if (!desiredType) {
         logger.warn(`Unsupported extension: ${extension}`);
         return res
