@@ -38,6 +38,13 @@ module.exports = async (req, res) => {
         md: 'text/markdown',
         json: 'application/json',
         // Add other mappings as needed
+        // Add image formats
+        png: 'image/png',
+        jpg: 'image/jpeg',
+        jpeg: 'image/jpeg',
+        webp: 'image/webp',
+        gif: 'image/gif',
+        avif: 'image/avif',
       };
 
       desiredType = extensionMap[ext];
