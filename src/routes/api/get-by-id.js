@@ -98,13 +98,35 @@ module.exports = async (req, res) => {
             },
             'Attempting conversion'
           );
+
+          // Right before the conversion attempt:
+          logger.debug(
+            {
+              extensionRequested: extension,
+              mappedDesiredType: desiredType,
+              fragmentFormats: fragment.formats,
+              fragmentMimeType: fragment.mimeType,
+              isFormatSupported: fragment.formats.includes(desiredType),
+            },
+            'Processing fragment conversion request'
+          );
+
           const convertedData = await convert(data, fragment.mimeType, desiredType);
 
           // Set Content-Type header and send converted data
           res.setHeader('Content-Type', desiredType);
           return res.status(200).send(convertedData);
         } catch (err) {
-          logger.error({ err }, 'Conversion error');
+          logger.error(
+            {
+              err,
+              stack: err.stack,
+              fromType: fragment.mimeType,
+              toType: desiredType,
+              dataLength: data.length,
+            },
+            'Conversion error'
+          );
           return res.status(415).json(createErrorResponse(415, `Error converting: ${err.message}`));
         }
       }
