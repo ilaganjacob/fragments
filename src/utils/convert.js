@@ -12,8 +12,9 @@ const { Readable } = require('stream');
  * @param {string} fromType - the content type of the data
  * @param {string} toType - the content type to convert to
  * @returns {Buffer} - the converted data
+ * @throws {Error} - if conversion is not supported
  */
-async function convert(data, fromType, toType) {
+function convert(data, fromType, toType) {
   // If types are the same, no conversion needed
   if (fromType === toType) {
     return data;
@@ -55,7 +56,7 @@ async function convert(data, fromType, toType) {
       const yamlData = yaml.dump(jsonData);
       return Buffer.from(yamlData);
     } catch (err) {
-      throw new Error(`Unable to convert JSON to YAML: ${err.message}`);
+      throw new Error('Unsupported conversion');
     }
   }
 
@@ -73,7 +74,7 @@ async function convert(data, fromType, toType) {
       const jsonData = JSON.stringify(yamlData, null, 2);
       return Buffer.from(jsonData);
     } catch (err) {
-      throw new Error(`Unable to convert YAML to JSON: ${err.message}`);
+      throw new Error('Unsupported conversion');
     }
   }
 
@@ -92,13 +93,13 @@ async function convert(data, fromType, toType) {
         Readable.from(data.toString())
           .pipe(csv())
           .on('data', (data) => results.push(data))
-          .on('error', (error) => reject(new Error(`CSV parsing error: ${error.message}`)))
+          .on('error', () => reject(new Error('Unsupported conversion')))
           .on('end', () => {
             resolve(Buffer.from(JSON.stringify(results)));
           });
       });
     } catch (err) {
-      throw new Error(`Unable to convert CSV to JSON: ${err.message}`);
+      throw new Error('Unsupported conversion');
     }
   }
 
@@ -130,18 +131,18 @@ async function convert(data, fromType, toType) {
           sharpImage = sharpImage.gif();
           break;
         default:
-          throw new Error(`Unsupported output image format: ${baseToType}`);
+          throw new Error('Unsupported conversion');
       }
 
       // Get the buffer
-      return await sharpImage.toBuffer();
+      return sharpImage.toBuffer();
     } catch (err) {
-      throw new Error(`Image conversion error: ${err.message}`);
+      throw new Error(`Unsupported conversion ${err.messsage}`);
     }
   }
 
   // If we don't know how to convert between these types, throw
-  throw new Error(`Unsupported conversion from ${fromType} to ${toType}`);
+  throw new Error('Unsupported conversion');
 }
 
 module.exports = convert;
