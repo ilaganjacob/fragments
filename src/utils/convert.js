@@ -56,7 +56,7 @@ function convert(data, fromType, toType) {
       const yamlData = yaml.dump(jsonData);
       return Buffer.from(yamlData);
     } catch (err) {
-      throw new Error('Unsupported conversion');
+      throw new Error(`Unsupported conversion ${err.message}`);
     }
   }
 
@@ -74,7 +74,7 @@ function convert(data, fromType, toType) {
       const jsonData = JSON.stringify(yamlData, null, 2);
       return Buffer.from(jsonData);
     } catch (err) {
-      throw new Error('Unsupported conversion');
+      throw new Error(`Unsupported conversion ${err.message}`);
     }
   }
 
@@ -99,7 +99,7 @@ function convert(data, fromType, toType) {
           });
       });
     } catch (err) {
-      throw new Error('Unsupported conversion');
+      throw new Error(`Unsupported conversion ${err.message}`);
     }
   }
 
