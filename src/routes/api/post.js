@@ -1,3 +1,4 @@
+// src/routes/api/post.js
 const { Fragment } = require('../../model/fragment');
 const { createSuccessResponse, createErrorResponse } = require('../../response');
 const logger = require('../../logger');
@@ -9,23 +10,38 @@ module.exports = async (req, res) => {
       method: req.method,
       path: req.path,
       contentType: req.get('content-type'),
+      contentTypeSupported: Fragment.isSupportedType(req.get('content-type') || ''),
       bodySize: req.body ? req.body.length : 0,
+      isBuffer: Buffer.isBuffer(req.body),
+      headers: req.headers,
     },
     'Incoming fragment creation request'
   );
 
   if (!Buffer.isBuffer(req.body)) {
     // Warn log: Invalid request body
-    logger.warn('Request body is not a Buffer');
+    logger.warn(
+      {
+        contentType: req.get('content-type'),
+        body: req.body,
+        isBuffer: Buffer.isBuffer(req.body),
+      },
+      'Request body is not a Buffer'
+    );
+
     // Wrong media type code
+    return res.status(415).json(createErrorResponse(415, 'Unsupported Media Type'));
+  }
+
+  // Additional check for content type support
+  const contentType = req.get('content-type');
+  if (!contentType || !Fragment.isSupportedType(contentType)) {
+    logger.warn({ contentType }, 'Unsupported content type');
     return res.status(415).json(createErrorResponse(415, 'Unsupported Media Type'));
   }
 
   // Try to create and save the fragment
   try {
-    // Get what type of content they sent (from Content-Type header)
-    const contentType = req.get('content-type'); // e.g. "text/plain"
-
     // Info log: Fragment creation attempt
     logger.info(
       {
@@ -65,8 +81,9 @@ module.exports = async (req, res) => {
     );
 
     // Use API_URL from environment if defined, otherwise fallback to localhost
-    const host = process.env.API_URL ? new URL(process.env.API_URL).host : 'localhost:8080';
-
+    const host = process.env.API_URL
+      ? new URL(process.env.API_URL).host
+      : req.get('host') || 'localhost:8080';
     const protocol = process.env.API_URL
       ? new URL(process.env.API_URL).protocol.replace(':', '')
       : req.protocol;
@@ -79,6 +96,7 @@ module.exports = async (req, res) => {
         locationUrl,
         protocol,
         host,
+        fragmentId: fragment.id,
       },
       'Generated Location header'
     );
@@ -103,6 +121,7 @@ module.exports = async (req, res) => {
     logger.error(
       {
         err,
+        stack: err.stack,
         ownerId: req.user,
         contentType: req.get('content-type'),
       },
