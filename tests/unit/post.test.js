@@ -55,7 +55,7 @@ describe('POST /v1/fragments', () => {
     // Check the Location header
     const location = res.headers.location;
     expect(location).toBeDefined();
-    expect(location).toMatch(/^http:\/\/localhost:[\d]+\/v1\/fragments\/[-\w]+$/);
+    expect(location).toMatch(/^http:\/\/(localhost|127\.0\.0\.1):[\d]+\/v1\/fragments\/[-\w]+$/);
   });
 
   test('create valid fragment with empty content', async () => {
