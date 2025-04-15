@@ -144,42 +144,44 @@ class Fragment {
    * Returns the formats into which this fragment type can be converted
    * @returns {Array<string>} list of supported mime types
    */
-  // Update the formats getter to include appropriate conversions
   get formats() {
     // Start with the base format (the fragment's own type)
     const baseFormat = [this.mimeType];
-
-    console.log('Fragment.formats called for type:', this.mimeType);
 
     // For text/markdown, allow conversion to HTML and plain text
     if (this.mimeType === 'text/markdown') {
       return [...baseFormat, 'text/html', 'text/plain'];
     }
 
-    // For plain text, allow no conversions (just return as is)
-    if (this.mimeType === 'text/plain') {
-      return baseFormat; // Only support the original format
+    // For text/html, allow conversion to plain text
+    if (this.mimeType === 'text/html') {
+      return [...baseFormat, 'text/plain'];
     }
 
-    // For CSV, allow conversion to JSON and plain text
+    // For text/plain, return only plain text
+    if (this.mimeType === 'text/plain') {
+      return baseFormat;
+    }
+
+    // For text/csv, allow conversion to JSON and plain text
     if (this.mimeType === 'text/csv') {
       return [...baseFormat, 'application/json', 'text/plain'];
     }
 
-    // For JSON, allow conversion to plain text and YAML
+    // For application/json, allow conversion to text, YAML
     if (this.mimeType === 'application/json') {
       return [...baseFormat, 'text/plain', 'application/yaml'];
     }
 
-    // For YAML, allow conversion to text and JSON
+    // For application/yaml, allow conversion to text and JSON
     if (this.mimeType === 'application/yaml') {
       return [...baseFormat, 'text/plain', 'application/json'];
     }
 
-    // For image types, allow conversion to all image formats
+    // For image types, allow conversion to all other image formats
     if (this.mimeType.startsWith('image/')) {
       return [
-        ...baseFormat,
+        this.mimeType,
         'image/png',
         'image/jpeg',
         'image/webp',
