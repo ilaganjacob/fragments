@@ -96,9 +96,8 @@ async function writeFragmentData(ownerId, id, data) {
 }
 
 // Reads a fragment's data from S3 and returns (Promise<Buffer>)
-// https://github.com/awsdocs/aws-sdk-for-javascript-v3/blob/main/doc_source/s3-example-creating-buckets.md#getting-a-file-from-an-amazon-s3-bucket
 async function readFragmentData(ownerId, id) {
-  // Create the PUT API params from our details
+  // Create the GET API params from our details
   const params = {
     Bucket: process.env.AWS_S3_BUCKET_NAME,
     // Our key will be a mix of the ownerID and fragment id, written as a path
@@ -111,11 +110,33 @@ async function readFragmentData(ownerId, id) {
   try {
     // Get the object from the Amazon S3 bucket. It is returned as a ReadableStream.
     const data = await s3Client.send(command);
+
+    // Add debug information about the response
+    logger.debug(
+      {
+        bucket: params.Bucket,
+        key: params.Key,
+        contentType: data.ContentType,
+        contentLength: data.ContentLength,
+        hasBody: !!data.Body,
+      },
+      'S3 GetObject response'
+    );
+
     // Convert the ReadableStream to a Buffer
     return streamToBuffer(data.Body);
   } catch (err) {
     const { Bucket, Key } = params;
-    logger.error({ err, Bucket, Key }, 'Error streaming fragment data from S3');
+    logger.error(
+      { err, Bucket, Key, errorName: err.name },
+      'Error streaming fragment data from S3'
+    );
+
+    // Check if this is a NoSuchKey error - item doesn't exist
+    if (err.$metadata?.httpStatusCode === 404 || err.name === 'NoSuchKey') {
+      throw new Error(`Fragment data with ID ${id} does not exist`);
+    }
+
     throw new Error('unable to read fragment data');
   }
 }
