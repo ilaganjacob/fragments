@@ -176,10 +176,10 @@ class Fragment {
       return [...baseFormat, 'text/plain', 'application/json'];
     }
 
-    // For image types, allow conversion to all other image formats
+    // For image types, allow conversion to all image formats
     if (this.mimeType.startsWith('image/')) {
       return [
-        this.mimeType,
+        ...baseFormat,
         'image/png',
         'image/jpeg',
         'image/webp',
