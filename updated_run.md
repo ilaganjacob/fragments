@@ -128,3 +128,7 @@ If the UI can't connect to the backend:
 
 1. Verify the API_URL is correct
 2. Check that the backend is running and accessible at that URL
+
+## Testing locally April 15th
+
+HTPASSWD_FILE=tests/.htpasswd LOG_LEVEL=debug npm start
