@@ -1,5 +1,4 @@
-// In src/routes/api/get-by-id.js
-
+// src/routes/api/get-by-id.js
 const path = require('path');
 const { Fragment } = require('../../model/fragment');
 const { createErrorResponse } = require('../../response');
@@ -53,11 +52,13 @@ module.exports = async (req, res) => {
 
       desiredType = extensionMap[ext];
 
-      // Log what's happening for debugging
-      console.log(`Extension: ${ext}, Mapped to: ${desiredType}`);
+      logger.debug(
+        { extension: ext, desiredType, originalId: req.params.id, parsedId: id },
+        'Parsed extension and mapped to content type'
+      );
 
       if (!desiredType) {
-        logger.warn(`Unsupported extension: ${extension}`);
+        logger.warn({ extension }, 'Unsupported extension');
         return res
           .status(415)
           .json(createErrorResponse(415, `Unsupported extension: ${extension}`));
@@ -67,6 +68,17 @@ module.exports = async (req, res) => {
     try {
       // Try to get the fragment by ID
       const fragment = await Fragment.byId(req.user, id);
+
+      logger.debug(
+        {
+          id,
+          fragmentType: fragment.type,
+          desiredType,
+          formats: fragment.formats,
+          mimeType: fragment.mimeType,
+        },
+        'Retrieved fragment, preparing response'
+      );
 
       // Get the raw fragment data
       const data = await fragment.getData();
@@ -81,6 +93,7 @@ module.exports = async (req, res) => {
               fragmentId: id,
               fromType: fragment.mimeType,
               toType: desiredType,
+              formats: fragment.formats,
             },
             'Unsupported conversion'
           );
@@ -96,29 +109,28 @@ module.exports = async (req, res) => {
         }
 
         try {
-          // When conversion is attempted
           logger.debug(
             {
               fromType: fragment.mimeType,
               toType: desiredType,
-              formats: fragment.formats,
+              dataSize: data.length,
             },
-            'Attempting conversion'
-          );
-
-          // Right before the conversion attempt:
-          logger.debug(
-            {
-              extensionRequested: extension,
-              mappedDesiredType: desiredType,
-              fragmentFormats: fragment.formats,
-              fragmentMimeType: fragment.mimeType,
-              isFormatSupported: fragment.formats.includes(desiredType),
-            },
-            'Processing fragment conversion request'
+            'Attempting format conversion'
           );
 
           const convertedData = await convert(data, fragment.mimeType, desiredType);
+
+          // Log successful conversion
+          logger.info(
+            {
+              fragmentId: id,
+              fromType: fragment.mimeType,
+              toType: desiredType,
+              originalSize: data.length,
+              convertedSize: convertedData.length,
+            },
+            'Fragment conversion successful'
+          );
 
           // Set Content-Type header and send converted data
           res.setHeader('Content-Type', desiredType);
@@ -130,7 +142,7 @@ module.exports = async (req, res) => {
               stack: err.stack,
               fromType: fragment.mimeType,
               toType: desiredType,
-              dataLength: data.length,
+              dataSize: data.length,
             },
             'Conversion error'
           );
@@ -139,6 +151,11 @@ module.exports = async (req, res) => {
       }
 
       // No conversion needed, send original data with original type
+      logger.debug(
+        { id, type: fragment.type, size: data.length },
+        'Sending original fragment data'
+      );
+
       res.setHeader('Content-Type', fragment.type);
       return res.status(200).send(data);
     } catch (err) {
@@ -149,11 +166,11 @@ module.exports = async (req, res) => {
       }
 
       // For other errors, return 500
-      logger.error({ err }, 'Error retrieving fragment');
+      logger.error({ err, stack: err.stack }, 'Error retrieving fragment');
       return res.status(500).json(createErrorResponse(500, 'Internal server error'));
     }
   } catch (err) {
-    logger.error({ err }, 'Unexpected error processing request');
+    logger.error({ err, stack: err.stack }, 'Unexpected error processing request');
     return res.status(500).json(createErrorResponse(500, 'Internal server error'));
   }
 };
