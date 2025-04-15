@@ -70,15 +70,62 @@ async function readFragment(ownerId, id) {
   }
 }
 
+// // Writes a fragment's data to an S3 Object in a Bucket
+// // https://github.com/awsdocs/aws-sdk-for-javascript-v3/blob/main/doc_source/s3-example-creating-buckets.md#upload-an-existing-object-to-an-amazon-s3-bucket
+// async function writeFragmentData(ownerId, id, data) {
+//   // Create the PUT API params from our details
+//   const params = {
+//     Bucket: process.env.AWS_S3_BUCKET_NAME,
+//     // Our key will be a mix of the ownerID and fragment id, written as a path
+//     Key: `${ownerId}/${id}`,
+//     Body: data,
+//   };
+
+//   // Create a PUT Object command to send to S3
+//   const command = new PutObjectCommand(params);
+
+//   try {
+//     // Use our client to send the command
+//     await s3Client.send(command);
+//   } catch (err) {
+//     // If anything goes wrong, log enough info that we can debug
+//     const { Bucket, Key } = params;
+//     logger.error({ err, Bucket, Key }, 'Error uploading fragment data to S3');
+//     throw new Error('unable to upload fragment data');
+//   }
+// }
+
 // Writes a fragment's data to an S3 Object in a Bucket
-// https://github.com/awsdocs/aws-sdk-for-javascript-v3/blob/main/doc_source/s3-example-creating-buckets.md#upload-an-existing-object-to-an-amazon-s3-bucket
 async function writeFragmentData(ownerId, id, data) {
+  if (!Buffer.isBuffer(data)) {
+    logger.warn(
+      {
+        dataType: typeof data,
+        isBuffer: Buffer.isBuffer(data),
+        ownerId,
+        id,
+      },
+      'Non-buffer data passed to writeFragmentData'
+    );
+
+    // Try to convert to Buffer if possible
+    if (typeof data === 'string') {
+      data = Buffer.from(data);
+      logger.info('Converted string to Buffer');
+    } else {
+      throw new Error('Fragment data must be a Buffer');
+    }
+  }
+
   // Create the PUT API params from our details
   const params = {
     Bucket: process.env.AWS_S3_BUCKET_NAME,
     // Our key will be a mix of the ownerID and fragment id, written as a path
     Key: `${ownerId}/${id}`,
     Body: data,
+    // Add content type metadata to the object if we know it
+    // This helps with retrieving the object later
+    ContentType: data.contentType || 'application/octet-stream',
   };
 
   // Create a PUT Object command to send to S3
@@ -86,11 +133,21 @@ async function writeFragmentData(ownerId, id, data) {
 
   try {
     // Use our client to send the command
-    await s3Client.send(command);
+    const result = await s3Client.send(command);
+    logger.debug(
+      {
+        bucket: params.Bucket,
+        key: params.Key,
+        etag: result.ETag,
+        contentType: params.ContentType,
+      },
+      'Successfully uploaded to S3'
+    );
+    return result;
   } catch (err) {
     // If anything goes wrong, log enough info that we can debug
     const { Bucket, Key } = params;
-    logger.error({ err, Bucket, Key }, 'Error uploading fragment data to S3');
+    logger.error({ err, Bucket, Key, errorName: err.name }, 'Error uploading fragment data to S3');
     throw new Error('unable to upload fragment data');
   }
 }
