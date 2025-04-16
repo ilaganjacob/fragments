@@ -29,8 +29,30 @@ module.exports = async (req, res) => {
     // Get the fragments for the current user
     // 'false' means we only want fragment ids
     // 'true' gives full fragments
-    const fragments = await Fragment.byUser(req.user, expand);
+    let fragments = await Fragment.byUser(req.user, expand);
 
+    // If expand=1 was used and we have Fragment instances
+    if (expand && Array.isArray(fragments)) {
+      // Convert the fragments to plain objects with formats included
+      fragments = fragments.map((fragment) => {
+        // Get the basic fragment data
+        const plainFragment = {
+          id: fragment.id,
+          ownerId: fragment.ownerId,
+          created: fragment.created,
+          updated: fragment.updated,
+          type: fragment.type,
+          size: fragment.size,
+        };
+
+        // Add formats if available
+        if (typeof fragment.formats !== 'undefined') {
+          plainFragment.formats = fragment.formats;
+        }
+
+        return plainFragment;
+      });
+    }
     // Debug log: Fragment retrieval details
     logger.debug(
       {
