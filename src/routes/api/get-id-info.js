@@ -38,6 +38,7 @@ module.exports = async (req, res) => {
           updated: fragment.updated,
           type: fragment.type,
           size: fragment.size,
+          formats: fragment.formats,
         },
       })
     );
